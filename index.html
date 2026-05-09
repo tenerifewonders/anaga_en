@@ -11,7 +11,7 @@
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
 
-  <!-- Leaflet -->
+  <!-- Leaflet (MAPA) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -26,9 +26,6 @@
   <!-- MAPA -->
   <div id="map"></div>
 
-  <!-- LISTA DE CAPÍTULOS -->
-  <div id="lista"></div>
-
   <br><br>
   <span style="margin-right:6px;">➡️</span>
   <a href="./EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
@@ -39,34 +36,6 @@
 
   <!-- Lógica -->
   <script src="./app.js"></script>
-
-  <!-- Generar lista -->
-  <script>
-  async function cargarPuntos() {
-    const res = await fetch('./ANAGA.geojson');
-    const data = await res.json();
-    return data.features.map(f => ({
-      nombre: f.properties.Name,
-      lat: f.geometry.coordinates[1],
-      lng: f.geometry.coordinates[0]
-    }));
-  }
-
-  async function generarLista() {
-    const puntos = await cargarPuntos();
-    const cont = document.getElementById("lista");
-
-    puntos.forEach((p, i) => {
-      const item = document.createElement("div");
-      item.className = "capitulo";
-      item.innerText = p.nombre;
-      item.onclick = () => seleccionarCapitulo(i);
-      cont.appendChild(item);
-    });
-  }
-
-  generarLista();
-  </script>
 
   <!-- MAPA -->
   <script>

@@ -30,26 +30,6 @@ h1 {
   overflow: hidden;
 }
 
-/* LISTA */
-#lista {
-  margin-top: 20px;
-}
-
-.capitulo {
-  padding: 12px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  font-size: 18px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.capitulo:hover {
-  background: #ececec;
-}
-
 /* AUDIO */
 audio {
   width: 100%;
