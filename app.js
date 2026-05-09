@@ -1,10 +1,7 @@
-// Ruta base de tus audios en Supabase
 const AUDIO_BASE = "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/";
 
 let audios = [];
-let indice = 0;
 
-// Cargar audios según número de puntos del GeoJSON
 async function cargarAudios() {
   const res = await fetch('./ANAGA.geojson');
   const data = await res.json();
@@ -21,9 +18,20 @@ async function loadGuide() {
   document.getElementById("guide-title").textContent = "Anaga";
   document.getElementById("guide-description").textContent = "The Pirate Coast";
 
-  // Reproducir automáticamente el primer audio
+  const lista = document.getElementById("audio-list");
+
+  audios.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.textContent = item.titulo;
+    li.onclick = () => reproducir(i);
+    lista.appendChild(li);
+  });
+}
+
+function reproducir(i) {
   const player = document.getElementById("player");
-  player.src = audios[0].audio;
+  player.src = audios[i].audio;
+  player.play();
 }
 
 loadGuide();
