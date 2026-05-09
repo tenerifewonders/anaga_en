@@ -10,6 +10,10 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- Leaflet (MAPA) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -18,6 +22,9 @@
     <h1 id="guide-title">Audio Guide</h1>
     <p id="guide-description" class="subtitle"></p>
   </header>
+
+  <!-- MAPA -->
+  <div id="map"></div>
 
   <!-- Lista generada desde ANAGA.geojson -->
   <div id="lista"></div>
@@ -31,7 +38,7 @@
 
   <section id="tracks" class="track-list"></section>
 
-  <!-- Tu reproductor -->
+  <!-- Reproductor -->
   <script src="app.js"></script>
 
   <!-- Script que carga el GeoJSON y genera la lista -->
@@ -62,5 +69,20 @@
   generarLista();
   </script>
 
-</body>
-</html>
+  <!-- MAPA: carga GeoJSON y muestra puntos -->
+  <script>
+  async function initMap() {
+    // Crear mapa centrado en Anaga
+    const map = L.map('map').setView([28.53, -16.25], 12);
+
+    // Capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(map);
+
+    // Cargar tus puntos
+    const res = await fetch('ANAGA.geojson');
+    const data = await res.json();
+
+    L.geoJSON(data, {
+      onEachFeature
