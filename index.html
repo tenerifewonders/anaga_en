@@ -6,10 +6,10 @@
   <title>Audioguía</title>
 
   <!-- Estilos -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="./styles.css">
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
 
   <!-- Leaflet (MAPA) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -31,7 +31,7 @@
 
   <br><br>
   <span style="margin-right:6px;">➡️</span>
-  <a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
+  <a href="./EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
   <br><br>
 
   <div class="hero" id="hero"></div>
@@ -39,12 +39,12 @@
   <section id="tracks" class="track-list"></section>
 
   <!-- Reproductor -->
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 
   <!-- Script que carga el GeoJSON y genera la lista -->
   <script>
   async function cargarPuntos() {
-    const res = await fetch('ANAGA.geojson');
+    const res = await fetch('./ANAGA.geojson');
     const data = await res.json();
     return data.features.map(f => ({
       nombre: f.properties.Name,
@@ -81,8 +81,18 @@
     }).addTo(map);
 
     // Cargar tus puntos
-    const res = await fetch('ANAGA.geojson');
+    const res = await fetch('./ANAGA.geojson');
     const data = await res.json();
 
     L.geoJSON(data, {
-      onEachFeature
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(feature.properties.Name);
+      }
+    }).addTo(map);
+  }
+
+  initMap();
+  </script>
+
+</body>
+</html>
