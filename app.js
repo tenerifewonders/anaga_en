@@ -1,25 +1,38 @@
-// URL del route.json en tu Netlify o Supabase
-const ROUTE_URL = "./route.json";
+// Ruta base de tus audios en Supabase
+const AUDIO_BASE = "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/";
+
+// Cargar puntos desde ANAGA.geojson
+async function cargarPuntos() {
+  const res = await fetch('ANAGA.geojson');
+  const data = await res.json();
+
+  return data.features.map((f, i) => ({
+    titulo: f.properties.Name,
+    audio: `${AUDIO_BASE}Anaga.${i + 1}.wav`
+  }));
+}
+
+let puntos = [];
+let indice = 0;
 
 async function loadGuide() {
   try {
-    const response = await fetch(ROUTE_URL);
-    const tracks = await response.json();
+    puntos = await cargarPuntos();
 
-    // Título y descripción (puedes personalizarlo aquí)
+    // Título y descripción
     document.getElementById("guide-title").textContent = "Anaga";
     document.getElementById("guide-description").textContent = "The Pirate Coast";
 
     const tracksContainer = document.getElementById("tracks");
     tracksContainer.innerHTML = "";
 
-    tracks.forEach(track => {
+    puntos.forEach((p, i) => {
       const div = document.createElement("div");
       div.className = "track";
 
       div.innerHTML = `
-        <div class="track-title">${track.title}</div>
-        <audio controls src="${track.audio_url}"></audio>
+        <div class="track-title">${p.titulo}</div>
+        <audio id="audio-${i}" controls src="${p.audio}"></audio>
       `;
 
       tracksContainer.appendChild(div);
@@ -30,4 +43,17 @@ async function loadGuide() {
   }
 }
 
+// Seleccionar capítulo desde la lista del index
+function seleccionarCapitulo(i) {
+  indice = i;
+
+  const audio = document.getElementById(`audio-${i}`);
+  if (audio) {
+    audio.scrollIntoView({ behavior: "smooth", block: "center" });
+    audio.play();
+  }
+}
+
 loadGuide();
+
+

@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v2";
+const CACHE_NAME = "anaga-cache-v3";
 
 const PRECACHE = [
   "/",
@@ -6,7 +6,7 @@ const PRECACHE = [
   "/styles.css",
   "/app.js",
   "/manifest.json",
-  "/route.json"
+  "/ANAGA.geojson"
 ];
 
 self.addEventListener("install", event => {
@@ -32,17 +32,32 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // No cachear audios
-  if (url.pathname.endsWith(".wav") || url.pathname.endsWith(".mp3")) {
+  // ✔ PERMITIR cachear audios de Supabase
+  if (url.href.includes("supabase.co/storage")) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        return (
+          cached ||
+          fetch(event.request).then(networkResponse => {
+            caches.open(CACHE_NAME).then(cache =>
+              cache.put(event.request, networkResponse.clone())
+            );
+            return networkResponse;
+          })
+        );
+      })
+    );
     return;
   }
 
-  // JSON → network first
-  if (url.pathname.endsWith("route.json")) {
+  // ✔ JSON → network first
+  if (url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson")) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+          caches.open(CACHE_NAME).then(cache =>
+            cache.put(event.request, response.clone())
+          );
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -50,13 +65,15 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Assets → cache first
+  // ✔ Assets → cache first
   event.respondWith(
     caches.match(event.request).then(cached => {
       return (
         cached ||
         fetch(event.request).then(networkResponse => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
+          caches.open(CACHE_NAME).then(cache =>
+            cache.put(event.request, networkResponse.clone())
+          );
           return networkResponse;
         })
       );

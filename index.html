@@ -10,8 +10,6 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
 </head>
 
 <body>
@@ -21,55 +19,48 @@
     <p id="guide-description" class="subtitle"></p>
   </header>
 
+  <!-- Lista generada desde ANAGA.geojson -->
+  <div id="lista"></div>
 
-<div id="map" style="width:100%; height:70vh;"></div>
-
-<script>
-  function initMap() {
-    const map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 28.414, lng: -16.540 },
-      zoom: 13
-    });
-
-    // Cargar tu mapa MyMaps como KML
-    const kmlLayer = new google.maps.KmlLayer({
-      url: "https://www.google.com/maps/d/kml?mid=1xjosQ0axzsEUa-dQOrJ-qTsGGMhvOxQ",
-      map: map,
-      preserveViewport: false
-    });
-
-    // Ubicación del usuario
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        new google.maps.Marker({
-          position: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          map,
-          title: "Estás aquí",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#4285F4",
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#fff"
-          }
-        });
-      });
-    }
-  }
-</script>
-
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
-
-<br><br>
-<span style="margin-right:6px;">➡️</span><a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
-<br><br>
-
+  <br><br>
+  <span style="margin-right:6px;">➡️</span>
+  <a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
+  <br><br>
 
   <div class="hero" id="hero"></div>
 
   <section id="tracks" class="track-list"></section>
 
+  <!-- Tu reproductor -->
   <script src="app.js"></script>
+
+  <!-- Script que carga el GeoJSON y genera la lista -->
+  <script>
+  async function cargarPuntos() {
+    const res = await fetch('ANAGA.geojson');
+    const data = await res.json();
+    return data.features.map(f => ({
+      nombre: f.properties.Name,
+      lat: f.geometry.coordinates[1],
+      lng: f.geometry.coordinates[0]
+    }));
+  }
+
+  async function generarLista() {
+    const puntos = await cargarPuntos();
+    const cont = document.getElementById("lista");
+
+    puntos.forEach((p, i) => {
+      const item = document.createElement("div");
+      item.className = "capitulo";
+      item.innerText = p.nombre;
+      item.onclick = () => seleccionarCapitulo(i);
+      cont.appendChild(item);
+    });
+  }
+
+  generarLista();
+  </script>
+
 </body>
 </html>

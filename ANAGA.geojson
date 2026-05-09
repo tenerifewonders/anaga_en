@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"name": "Capa sin nombre",
+"features": [
+{ "type": "Feature", "properties": { "Name": "1. Antiguo Convento de Santo Domingo" }, "geometry": { "type": "Point", "coordinates": [ -16.313423, 28.485858, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "2. Camino viejo al pico del inglés" }, "geometry": { "type": "Point", "coordinates": [ -16.268433, 28.535007, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "3. Mirador Pico del Inglés" }, "geometry": { "type": "Point", "coordinates": [ -16.263997, 28.533007, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "4. Mirador Bailadero" }, "geometry": { "type": "Point", "coordinates": [ -16.206877, 28.549166, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "5. Mirador Risco Amogoje" }, "geometry": { "type": "Point", "coordinates": [ -16.205677, 28.558258, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "6. Taganana" }, "geometry": { "type": "Point", "coordinates": [ -16.21727, 28.56047, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "7. Roque de las Bodegas" }, "geometry": { "type": "Point", "coordinates": [ -16.204568, 28.571198, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "8. Playa de Almáciga" }, "geometry": { "type": "Point", "coordinates": [ -16.192508, 28.572064, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "9. Castillo de Paso Alto" }, "geometry": { "type": "Point", "coordinates": [ -16.240959, 28.480816, 0.0 ] } }
+]
+}
