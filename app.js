@@ -4,6 +4,7 @@ const AUDIO_BASE = "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/p
 let puntos = [];
 let indice = 0;
 
+// Cargar puntos + audios
 async function cargarPuntosAudio() {
   const res = await fetch('./ANAGA.geojson');
   const data = await res.json();
@@ -15,12 +16,13 @@ async function cargarPuntosAudio() {
 }
 
 async function loadGuide() {
-  puntos = await cargarPuntosAudio();
+  puntos = await cargarPuntosAudio();  // ← AHORA SE CARGA ANTES DE USARLO
 
   document.getElementById("guide-title").textContent = "Anaga";
   document.getElementById("guide-description").textContent = "The Pirate Coast";
 }
 
+// Reproducir audio correcto
 function seleccionarCapitulo(i) {
   indice = i;
   const player = document.getElementById("player");
