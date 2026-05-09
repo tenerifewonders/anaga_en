@@ -11,7 +11,7 @@
   <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
 
-  <!-- Leaflet (MAPA) -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -26,7 +26,7 @@
   <!-- MAPA -->
   <div id="map"></div>
 
-  <!-- Lista generada desde ANAGA.geojson -->
+  <!-- LISTA DE CAPÍTULOS -->
   <div id="lista"></div>
 
   <br><br>
@@ -34,14 +34,13 @@
   <a href="./EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
   <br><br>
 
-  <div class="hero" id="hero"></div>
-
-  <section id="tracks" class="track-list"></section>
-
   <!-- Reproductor -->
+  <audio id="player" controls></audio>
+
+  <!-- Lógica -->
   <script src="./app.js"></script>
 
-  <!-- Script que carga el GeoJSON y genera la lista -->
+  <!-- Generar lista -->
   <script>
   async function cargarPuntos() {
     const res = await fetch('./ANAGA.geojson');
@@ -69,18 +68,15 @@
   generarLista();
   </script>
 
-  <!-- MAPA: carga GeoJSON y muestra puntos -->
+  <!-- MAPA -->
   <script>
   async function initMap() {
-    // Crear mapa centrado en Anaga
     const map = L.map('map').setView([28.53, -16.25], 12);
 
-    // Capa base
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18
     }).addTo(map);
 
-    // Cargar tus puntos
     const res = await fetch('./ANAGA.geojson');
     const data = await res.json();
 
