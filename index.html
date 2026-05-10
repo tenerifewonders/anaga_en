@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audioguía Anaga</title>
 
-  <link rel="stylesheet" href="styles.css">
-
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -15,7 +13,8 @@
     body { margin: 0; font-family: sans-serif; }
     #map { height: 50vh; width: 100%; }
     #audio-list { padding: 15px; list-style: none; margin: 0; }
-    #audio-list li { padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    #audio-list li:hover { background: #f0f0f0; }
     #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; }
   </style>
 </head>
@@ -26,7 +25,49 @@
   <div id="map"></div>
 
   <!-- LISTA DE AUDIOS -->
-  <ul id="audio-list"></ul>
+  <ul id="audio-list">
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.intro.wav">
+      Intro — Presentación
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.1.wav">
+      1. Church of Santo Domingo de Guzmán — The Corsair’s Tomb
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.2.wav">
+      2. Old Path to Pico del Inglés — The Journey through Time
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.3.wav">
+      3. Mirador del Pico del Inglés — The Corsairs’ Balcony
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.4.wav">
+      4. Mirador del Bailadero — Where Paths Cross... and Legends
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.5.wav">
+      5. Mirador Risco Amogoje — The Smugglers’ Refuge
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.6.wav">
+      6. Taganana — The Atlantic Frontier
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.7.wav">
+      7. Roque de las Bodegas — The Port of Smuggling and Shakespeare’s Wine
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.7.wav">
+      8. Almáciga — The Roar of the Wild Sea
+    </li>
+
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.9.wav">
+      9. Castillo de Paso Alto — The Guardian of the Bay
+    </li>
+
+  </ul>
 
   <!-- PLAYER -->
   <audio id="audio-player" controls></audio>
@@ -42,33 +83,19 @@
       tileSize: 256
     }).addTo(map);
 
-    // Cargar GeoJSON
+    // Cargar puntos desde GeoJSON
     fetch('./ANAGA.geojson')
       .then(res => res.json())
       .then(data => {
-        const list = document.getElementById("audio-list");
         const player = document.getElementById("audio-player");
 
         L.geoJSON(data, {
           onEachFeature: (feature, layer) => {
-            const name = feature.properties.Name;
             const audioUrl = feature.properties.audio;
+            const name = feature.properties.Name;
 
-            // Añadir a la lista
-            const li = document.createElement("li");
-            li.textContent = name;
-            li.onclick = () => {
-              player.src = audioUrl;
-              player.play();
-              map.setView(layer.getLatLng(), 15);
-              layer.openPopup();
-            };
-            list.appendChild(li);
-
-            // Popup en el mapa
             layer.bindPopup(name);
 
-            // Click en el mapa reproduce audio
             layer.on("click", () => {
               player.src = audioUrl;
               player.play();
@@ -76,6 +103,18 @@
           }
         }).addTo(map);
       });
+
+    // Activar lista de audios
+    const player = document.getElementById("audio-player");
+    const items = document.querySelectorAll("#audio-list li");
+
+    items.forEach(li => {
+      li.addEventListener("click", () => {
+        const url = li.getAttribute("data-audio");
+        player.src = url;
+        player.play();
+      });
+    });
 
     // Geolocalización
     map.locate({ setView: false });
