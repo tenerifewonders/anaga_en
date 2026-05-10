@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audioguía</title>
 
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="manifest" href="./manifest.json">
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
 </head>
 
 <body>
@@ -19,41 +21,55 @@
     <p id="guide-description" class="subtitle"></p>
   </header>
 
-  <!-- MAPA -->
-  <div id="map"></div>
 
-  <!-- LISTA DE AUDIOS -->
-  <ul id="audio-list"></ul>
+<div id="map" style="width:100%; height:70vh;"></div>
 
-  <br><br>
-  <a href="./EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
+<script>
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 28.414, lng: -16.540 },
+      zoom: 13
+    });
 
-  <!-- Reproductor -->
-  <audio id="player" controls></audio>
+    // Cargar tu mapa MyMaps como KML
+    const kmlLayer = new google.maps.KmlLayer({
+      url: "https://www.google.com/maps/d/kml?mid=1xjosQ0axzsEUa-dQOrJ-qTsGGMhvOxQ",
+      map: map,
+      preserveViewport: false
+    });
 
-  <script src="./app.js"></script>
-
-  <!-- MAPA -->
-  <script>
-  async function initMap() {
-    const map = L.map('map').setView([28.53, -16.25], 12);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18
-    }).addTo(map);
-
-    const res = await fetch('./ANAGA.geojson');
-    const data = await res.json();
-
-    L.geoJSON(data, {
-      onEachFeature: (feature, layer) => {
-        layer.bindPopup(feature.properties.Name);
-      }
-    }).addTo(map);
+    // Ubicación del usuario
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        new google.maps.Marker({
+          position: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          map,
+          title: "Estás aquí",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#4285F4",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#fff"
+          }
+        });
+      });
+    }
   }
+</script>
 
-  initMap();
-  </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
 
+<br><br>
+<span style="margin-right:6px;">➡️</span><a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
+<br><br>
+
+
+  <div class="hero" id="hero"></div>
+
+  <section id="tracks" class="track-list"></section>
+
+  <script src="app.js"></script>
 </body>
 </html>

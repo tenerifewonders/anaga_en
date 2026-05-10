@@ -1,23 +1,29 @@
-const CACHE_NAME = "anaga-cache-v9";
+const CACHE_NAME = "anaga-cache-v2";
 
 const PRECACHE = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./manifest.json",
-  "./ANAGA.geojson"
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/app.js",
+  "/manifest.json",
+  "/route.json"
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
     )
   );
   self.clients.claim();
@@ -26,27 +32,18 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // Cachear audios de Supabase
-  if (url.href.includes("supabase.co/storage")) {
-    event.respondWith(
-      caches.match(event.request).then(cached =>
-        cached ||
-        fetch(event.request).then(res => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, res.clone()));
-          return res;
-        })
-      )
-    );
+  // No cachear audios
+  if (url.pathname.endsWith(".wav") || url.pathname.endsWith(".mp3")) {
     return;
   }
 
-  // JSON y GEOJSON → network first
-  if (url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson")) {
+  // JSON → network first
+  if (url.pathname.endsWith("route.json")) {
     event.respondWith(
       fetch(event.request)
-        .then(res => {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, res.clone()));
-          return res;
+        .then(response => {
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+          return response;
         })
         .catch(() => caches.match(event.request))
     );
@@ -55,12 +52,14 @@ self.addEventListener("fetch", event => {
 
   // Assets → cache first
   event.respondWith(
-    caches.match(event.request).then(cached =>
-      cached ||
-      fetch(event.request).then(res => {
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, res.clone()));
-        return res;
-      })
-    )
+    caches.match(event.request).then(cached => {
+      return (
+        cached ||
+        fetch(event.request).then(networkResponse => {
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
+          return networkResponse;
+        })
+      );
+    })
   );
 });
