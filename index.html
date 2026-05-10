@@ -3,73 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audioguía</title>
+  <title>Audioguía Anaga</title>
 
-  <!-- Estilos -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #map { height: 50vh; width: 100%; }
+    #audio-list { padding: 15px; list-style: none; margin: 0; }
+    #audio-list li { padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; }
+  </style>
 </head>
 
 <body>
 
-  <header>
-    <h1 id="guide-title">Audio Guide</h1>
-    <p id="guide-description" class="subtitle"></p>
-  </header>
+  <!-- MAPA -->
+  <div id="map"></div>
 
+  <!-- LISTA DE AUDIOS -->
+  <ul id="audio-list"></ul>
 
-<div id="map" style="width:100%; height:70vh;"></div>
+  <!-- PLAYER -->
+  <audio id="audio-player" controls></audio>
 
-<script>
-  function initMap() {
-    const map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 28.414, lng: -16.540 },
-      zoom: 13
-    });
+  <script>
+    // Inicializar mapa
+    const map = L.map('map').setView([28.525, -16.25], 13);
 
-    // Cargar tu mapa MyMaps como KML
-    const kmlLayer = new google.maps.KmlLayer({
-      url: "https://www.google.com/maps/d/kml?mid=1xjosQ0axzsEUa-dQOrJ-qTsGGMhvOxQ",
-      map: map,
-      preserveViewport: false
-    });
+    // Tiles locales
+    L.tileLayer('./tiles/{z}/{x}/{y}.png', {
+      minZoom: 11,
+      maxZoom: 14,
+      tileSize: 256
+    }).addTo(map);
 
-    // Ubicación del usuario
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        new google.maps.Marker({
-          position: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-          map,
-          title: "Estás aquí",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#4285F4",
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: "#fff"
+    // Cargar GeoJSON
+    fetch('./ANAGA.geojson')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("audio-list");
+        const player = document.getElementById("audio-player");
+
+        L.geoJSON(data, {
+          onEachFeature: (feature, layer) => {
+            const name = feature.properties.Name;
+            const audioUrl = feature.properties.audio;
+
+            // Añadir a la lista
+            const li = document.createElement("li");
+            li.textContent = name;
+            li.onclick = () => {
+              player.src = audioUrl;
+              player.play();
+              map.setView(layer.getLatLng(), 15);
+              layer.openPopup();
+            };
+            list.appendChild(li);
+
+            // Popup en el mapa
+            layer.bindPopup(name);
+
+            // Click en el mapa reproduce audio
+            layer.on("click", () => {
+              player.src = audioUrl;
+              player.play();
+            });
           }
-        });
+        }).addTo(map);
       });
+
+    // Geolocalización
+    map.locate({ setView: false });
+
+    map.on('locationfound', e => {
+      L.circleMarker(e.latlng, {
+        radius: 8,
+        color: "#007bff",
+        fillColor: "#3fa0ff",
+        fillOpacity: 0.8
+      }).addTo(map);
+    });
+  </script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
     }
-  }
-</script>
+  </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
-
-<br><br>
-<span style="margin-right:6px;">➡️</span><a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
-<br><br>
-
-
-  <div class="hero" id="hero"></div>
-
-  <section id="tracks" class="track-list"></section>
-
-  <script src="app.js"></script>
 </body>
 </html>
