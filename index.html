@@ -25,13 +25,17 @@
   <div id="map"></div>
 
 <p>
-📍 Google Maps route available (data connection required): 
-<a href="https://www.google.com/maps/dir/28.485858,-16.313423/28.535007,-16.268433/28.533007,-16.263997/28.549166,-16.206877/28.558258,-16.205677/28.560470,-16.217270/28.571198,-16.204568/28.572064,-16.192508/28.480816,-16.240959" target="_blank">open route</a>
+  <a href="https://www.google.com/maps/dir/28.485858,-16.313423/28.535007,-16.268433/28.533007,-16.263997/28.549166,-16.206877/28.558258,-16.205677/28.560470,-16.217270/28.571198,-16.204568/28.572064,-16.192508/28.480816,-16.240959" 
+     target="_blank">
+    📍 Google Maps route available
+  </a>
+  <span>(data connection required)</span>
 </p>
 
 <p>
-📄 Full guide available: 
-<a href="EN-ANAGA.html" target="_blank">open file</a>
+  <a href="EN-ANAGA.html" target="_blank">
+    📄 Opening hours and practical tips
+  </a>
 </p>
 
 
@@ -86,7 +90,10 @@
 
   <script>
     // Inicializar mapa
-    const map = L.map('map').setView([28.525, -16.25], 13);
+    const map = L.map('map', {
+  attributionControl: false
+}).setView([28.3, -16.5], 13);
+
 
     // Tiles locales
     L.tileLayer('./tiles/{z}/{x}/{y}.png', {
