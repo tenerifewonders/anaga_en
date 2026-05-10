@@ -1,97 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anaga Audioguía</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audioguía</title>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css">
 
-  <!-- Estilos básicos -->
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: sans-serif;
-    }
-    #map {
-      height: 100%;
-      width: 100%;
-    }
-    #player {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      padding: 10px;
-      border-top: 1px solid #ccc;
-    }
-  </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
 </head>
 
 <body>
 
-<div id="map"></div>
+  <header>
+    <h1 id="guide-title">Audio Guide</h1>
+    <p id="guide-description" class="subtitle"></p>
+  </header>
 
-<div id="player">
-  <audio id="audio" controls style="width:100%"></audio>
-</div>
+
+<div id="map" style="width:100%; height:70vh;"></div>
 
 <script>
-  // Inicializar mapa
-  const map = L.map('map').setView([28.525, -16.25], 13);
-
-  // Tiles locales (offline)
-  L.tileLayer('./tiles/{z}/{x}/{y}.png', {
-    minZoom: 11,
-    maxZoom: 14,
-    tileSize: 256
-  }).addTo(map);
-
-  // Cargar puntos desde GeoJSON local
-  fetch('./ANAGA.geojson')
-    .then(res => res.json())
-    .then(data => {
-      L.geoJSON(data, {
-        onEachFeature: (feature, layer) => {
-          if (feature.properties && feature.properties.audio) {
-            layer.on('click', () => {
-              const audio = document.getElementById("audio");
-              audio.src = feature.properties.audio;
-              audio.play();
-            });
-          }
-        }
-      }).addTo(map);
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 28.414, lng: -16.540 },
+      zoom: 13
     });
 
-  // Geolocalización
-  map.locate({ setView: true, maxZoom: 14 });
+    // Cargar tu mapa MyMaps como KML
+    const kmlLayer = new google.maps.KmlLayer({
+      url: "https://www.google.com/maps/d/kml?mid=1xjosQ0axzsEUa-dQOrJ-qTsGGMhvOxQ",
+      map: map,
+      preserveViewport: false
+    });
 
-  map.on('locationfound', e => {
-    L.circleMarker(e.latlng, {
-      radius: 8,
-      color: "#007bff",
-      fillColor: "#3fa0ff",
-      fillOpacity: 0.8
-    }).addTo(map);
-  });
-
-  map.on('locationerror', () => {
-    console.log("No se pudo obtener la ubicación.");
-  });
-</script>
-
-<!-- Registrar Service Worker -->
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js");
+    // Ubicación del usuario
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        new google.maps.Marker({
+          position: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          map,
+          title: "Estás aquí",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#4285F4",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#fff"
+          }
+        });
+      });
+    }
   }
 </script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY-SsX3gDUACQUc1aZYlq9kUlgeRD4pWs&callback=initMap" async defer></script>
+
+<br><br>
+<span style="margin-right:6px;">➡️</span><a href="EN-ANAGA.pdf" target="_blank">ANAGA - THE PIRATE COAST.PDF</a>
+<br><br>
+
+
+  <div class="hero" id="hero"></div>
+
+  <section id="tracks" class="track-list"></section>
+
+  <script src="app.js"></script>
 </body>
 </html>
