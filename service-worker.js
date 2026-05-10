@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v9";
+const CACHE_NAME = "anaga-cache-v11";
 
 const PRECACHE = [
   "./",
