@@ -84,6 +84,13 @@
 
   </ul>
 <br>
+
+<div id="ios-msg" style="display:none;">
+➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
+</div>
+
+
+
 <br>
   <!-- PLAYER -->
   <audio id="audio-player" controls controlsList="nodownload"></audio>
@@ -154,6 +161,14 @@
       navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
+
+
+<script>
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
+    document.getElementById('ios-msg').style.display = 'block';
+  }
+</script>
+
 
 </body>
 </html>
