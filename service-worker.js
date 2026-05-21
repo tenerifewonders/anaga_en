@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v15";
+const CACHE_NAME = "anaga-cache-v16";
 
 const ASSETS = [
   "./",
@@ -6,8 +6,11 @@ const ASSETS = [
   "./app.js",
   "./ANAGA.geojson",
   "./manifest.json",
-  "./styles.css"
+  "./styles.css",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
+
 
 // Instalar SW y cachear archivos base
 self.addEventListener("install", event => {
