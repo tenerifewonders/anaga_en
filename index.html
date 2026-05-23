@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anaga Offline Map</title>
+  <title>Audioguía Anaga</title>
 
   <!-- Leaflet -->
   <link
@@ -19,13 +19,25 @@
 </head>
 
 <body>
+
+  <!-- MAPA ARRIBA -->
   <div id="map"></div>
 
+  <!-- LISTA DE AUDIOS DEBAJO -->
+  <header>
+    <h1>Audioguía de Anaga</h1>
+    <p class="subtitle">Escucha cada punto de la ruta</p>
+  </header>
+
+  <div class="track-list" id="audioList"></div>
+
   <script src="./app.js"></script>
+
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
+
 </body>
 </html>

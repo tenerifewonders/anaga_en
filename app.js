@@ -13,15 +13,30 @@ L.tileLayer('./tiles/{z}/{x}/{y}.png', {
   attribution: 'Map data © OpenStreetMap contributors'
 }).addTo(map);
 
-// Cargar GeoJSON
+// Cargar GeoJSON + generar lista de audios
 fetch('./ANAGA.geojson')
   .then(res => res.json())
   .then(data => {
+    const audioList = document.getElementById("audioList");
+
     L.geoJSON(data, {
       onEachFeature: (feature, layer) => {
-        if (feature.properties && feature.properties.name) {
-          layer.bindPopup(feature.properties.name);
-        }
+        const name = feature.properties.name;
+        const audio = feature.properties.audio; // Debe venir en el GeoJSON
+
+        // Popup en el mapa
+        layer.bindPopup(name);
+
+        // Crear tarjeta de audio
+        const track = document.createElement("div");
+        track.className = "track";
+
+        track.innerHTML = `
+          <div class="track-title">${name}</div>
+          <audio controls src="${audio}"></audio>
+        `;
+
+        audioList.appendChild(track);
       }
     }).addTo(map);
   });
