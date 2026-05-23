@@ -1,7 +1,7 @@
 {
-  "name": "Anaga Explorador Audioguía",
+  "name": "Anaga Audioguide",
   "short_name": "Anaga Audio",
-  "description": "Explora Anaga con nuestra audioguía inmersiva.",
+  "description": "Explore Anaga with our immersive audio guide.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0d0d12",
