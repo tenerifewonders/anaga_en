@@ -1,25 +1,26 @@
-const CACHE_NAME = "anaga-en-v2";
+const CACHE_NAME = "anaga-en-v3";
 
-const ASSETS = [
+// Archivos base que deben estar siempre offline
+const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./ANAGA.geojson",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  "./ANAGA.geojson",
+  "./leaflet.css",
+  "./leaflet.js"
 ];
 
-// Instalar SW y cachear archivos base
+// Instalar SW → cachea lo básico
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activar SW y limpiar versiones antiguas
+// Activar SW → limpiar versiones antiguas
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -33,33 +34,57 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Interceptar peticiones
+// Estrategia de fetch:
+// 1) Audios → cache dinámico
+// 2) Tiles → cache dinámico
+// 3) HTML/JS/CSS → network-first con fallback a cache
 self.addEventListener("fetch", event => {
-  const url = new URL(event.request.url);
+  const url = event.request.url;
 
-  // Solo interceptar peticiones GET con protocolo HTTP/HTTPS
-  if (event.request.method !== 'GET' || (url.protocol !== 'http:' && url.protocol !== 'https:')) {
+  // 🔊 AUDIOS .wav (Supabase)
+  if (url.endsWith(".wav")) {
+    event.respondWith(
+      caches.open("audio-cache").then(cache =>
+        cache.match(event.request).then(resp => {
+          return (
+            resp ||
+            fetch(event.request).then(networkResp => {
+              cache.put(event.request, networkResp.clone());
+              return networkResp;
+            })
+          );
+        })
+      )
+    );
     return;
   }
 
-  // Dejar que audios y tiles vayan directamente a la red sin pasar por la caché
-  if (url.href.includes("supabase.co/storage") || url.pathname.includes("/tiles/")) {
-    return; // Pass-through directo a la red (evita problemas de Range 206)
+  // 🗺️ TILES DEL MAPA
+  if (url.includes("/tiles/")) {
+    event.respondWith(
+      caches.open("tiles-cache").then(cache =>
+        cache.match(event.request).then(resp => {
+          return (
+            resp ||
+            fetch(event.request).then(networkResp => {
+              cache.put(event.request, networkResp.clone());
+              return networkResp;
+            })
+          );
+        })
+      )
+    );
+    return;
   }
 
-  // Cache-first para los recursos de la App Shell (HTML, GeoJSON, CDN de Leaflet)
+  // 📄 HTML / JS / CSS → network first
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return (
-        cached ||
-        fetch(event.request).then(networkResponse => {
-          if (networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
-          }
-          return networkResponse;
-        })
-      );
-    })
+    fetch(event.request)
+      .then(resp => {
+        const clone = resp.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return resp;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
