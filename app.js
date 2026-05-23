@@ -1,42 +1,162 @@
-// Crear mapa centrado en Anaga
-const map = L.map('map', {
-  zoomControl: true,
-  minZoom: 10,
-  maxZoom: 16
-}).setView([28.526, -16.247], 13);
+const ROUTE_URL = "./ANAGA.geojson";
 
-// Tiles locales
-L.tileLayer('./tiles/{z}/{x}/{y}.png', {
-  tileSize: 256,
-  minZoom: 10,
-  maxZoom: 16,
-  attribution: 'Map data © OpenStreetMap contributors'
-}).addTo(map);
+const player = document.getElementById("audio-player");
+const tracksContainer = document.getElementById("audio-list");
 
-// Cargar GeoJSON + generar lista de audios
-fetch('./ANAGA.geojson')
-  .then(res => res.json())
-  .then(data => {
-    const audioList = document.getElementById("audioList");
 
-    L.geoJSON(data, {
-      onEachFeature: (feature, layer) => {
-        const name = feature.properties.name;
-        const audio = feature.properties.audio; // Debe venir en el GeoJSON
+// LOAD GUIDE
+async function loadGuide() {
 
-        // Popup en el mapa
-        layer.bindPopup(name);
+  try {
 
-        // Crear tarjeta de audio
-        const track = document.createElement("div");
-        track.className = "track";
+    const response = await fetch(ROUTE_URL);
 
-        track.innerHTML = `
-          <div class="track-title">${name}</div>
-          <audio controls src="${audio}"></audio>
-        `;
+    if (!response.ok) {
+      throw new Error("GeoJSON not found");
+    }
 
-        audioList.appendChild(track);
+    const data = await response.json();
+
+    tracksContainer.innerHTML = "";
+
+    data.features.forEach((feature, index) => {
+
+      const name =
+        feature.properties.Name || `Track ${index + 1}`;
+
+      const audioUrl =
+        feature.properties.audio;
+
+      // CREATE ITEM
+      const li = document.createElement("li");
+
+      li.className = "track-item";
+
+      li.textContent = `${index}. ${name}`;
+
+      // CLICK
+      li.addEventListener("click", async () => {
+
+        try {
+
+          // ACTIVE STYLE
+          document
+            .querySelectorAll(".track-item")
+            .forEach(item => {
+              item.style.background = "";
+            });
+
+          li.style.background = "#f0f0f0";
+
+          // SET AUDIO
+          player.src = audioUrl;
+
+          // PRELOAD
+          player.load();
+
+          // PLAY
+          await player.play();
+
+        } catch(err) {
+
+          console.log("Audio playback error", err);
+
+        }
+
+      });
+
+      tracksContainer.appendChild(li);
+
+    });
+
+  } catch(error) {
+
+    console.error(
+      "Error loading audioguide:",
+      error
+    );
+
+    tracksContainer.innerHTML = `
+      <li>
+        Failed to load audioguide
+      </li>
+    `;
+
+  }
+
+}
+
+
+// DOWNLOAD OFFLINE
+async function downloadOfflineContent() {
+
+  try {
+
+    const cache = await caches.open("anaga-v1");
+
+    const response = await fetch(ROUTE_URL);
+
+    const data = await response.json();
+
+    const urls = [
+
+      "./",
+      "./index.html",
+      "./manifest.json",
+      "./ANAGA.geojson",
+      "./EN-ANAGA.html",
+      "./leaflet.js",
+      "./leaflet.css",
+      "./icon-192.png",
+      "./icon-512.png"
+
+    ];
+
+    // ADD AUDIOS
+    data.features.forEach(feature => {
+
+      if (feature.properties.audio) {
+
+        urls.push(feature.properties.audio);
+
       }
-    }).addTo(map);
-  });
+
+    });
+
+    // CACHE ALL
+    await cache.addAll(urls);
+
+    console.log("Offline content downloaded");
+
+    alert("Offline content downloaded ✔");
+
+  } catch(error) {
+
+    console.error(
+      "Offline download failed:",
+      error
+    );
+
+    alert("Offline download failed");
+
+  }
+
+}
+
+
+// BUTTON
+const downloadBtn =
+  document.getElementById("download-btn");
+
+if (downloadBtn) {
+
+  downloadBtn.addEventListener(
+    "click",
+    downloadOfflineContent
+  );
+
+}
+
+
+// INIT
+loadGuide();

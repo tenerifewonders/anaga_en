@@ -1,102 +1,106 @@
-const CACHE_NAME = "anaga-cache-v17";
+const CACHE_NAME = "anaga-v1";
 
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./app.js",
-  "./ANAGA.geojson",
-  "./manifest.json",
-  "./styles.css",
-  "./icon-192.png",
-  "./icon-512.png"
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/ANAGA.geojson",
+  "/EN-ANAGA.html",
+  "/leaflet.css",
+  "/leaflet.js",
+  "/icon-192.png",
+  "/icon-512.png"
 ];
 
-// Instalar SW y cachear archivos base
+
+// INSTALL
 self.addEventListener("install", event => {
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(STATIC_ASSETS))
+
   );
+
   self.skipWaiting();
+
 });
 
-// Activar SW y limpiar versiones antiguas
+
+// ACTIVATE
 self.addEventListener("activate", event => {
+
   event.waitUntil(
+
     caches.keys().then(keys =>
+
       Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+
+        keys.map(key => {
+
+          if (key !== CACHE_NAME) {
+
+            return caches.delete(key);
+
+          }
+
+        })
+
       )
+
     )
+
   );
+
   self.clients.claim();
+
 });
 
-// Interceptar peticiones
+
+// FETCH
 self.addEventListener("fetch", event => {
-  const url = new URL(event.request.url);
 
-  // 1) Cachear audios de Supabase
-  if (url.href.includes("supabase.co/storage")) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        return (
-          cached ||
-          fetch(event.request).then(networkResponse => {
-            caches.open(CACHE_NAME).then(cache =>
-              cache.put(event.request, networkResponse.clone())
-            );
-            return networkResponse;
-          })
-        );
-      })
-    );
-    return;
-  }
-
-  // 2) Cachear JSON/GeoJSON
-  if (url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson")) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          caches.open(CACHE_NAME).then(cache =>
-            cache.put(event.request, response.clone())
-          );
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // 3) Cachear tiles locales
-  if (url.pathname.includes("/tiles/")) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        return (
-          cached ||
-          fetch(event.request).then(networkResponse => {
-            caches.open(CACHE_NAME).then(cache =>
-              cache.put(event.request, networkResponse.clone())
-            );
-            return networkResponse;
-          })
-        );
-      })
-    );
-    return;
-  }
-
-  // 4) Cache-first para assets estáticos
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return (
-        cached ||
-        fetch(event.request).then(networkResponse => {
-          return networkResponse;
-        })
-      );
-    })
+
+    caches.match(event.request)
+
+      .then(cached => {
+
+        if (cached) {
+
+          return cached;
+
+        }
+
+        return fetch(event.request)
+
+          .then(response => {
+
+            // SAVE TO CACHE
+            const clone = response.clone();
+
+            caches.open(CACHE_NAME)
+
+              .then(cache => {
+
+                cache.put(event.request, clone);
+
+              });
+
+            return response;
+
+          })
+
+          .catch(() => {
+
+            // OFFLINE FALLBACK
+            return caches.match("/index.html");
+
+          });
+
+      })
+
   );
+
 });
