@@ -2,7 +2,6 @@ body {
   font-family: system-ui, sans-serif;
   margin: 0;
   padding: 20px;
-  padding-bottom: 54px; /* evita que el player tape el contenido */
   background: #f5f5f5;
   color: #222;
 }

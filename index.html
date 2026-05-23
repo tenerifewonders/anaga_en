@@ -93,14 +93,6 @@
 <div class="install-android">
 ➕ <strong>Open the browser menu and tap <em>Add to Home Screen</em> to install the app and access all content offline.</strong>
 
-</div>
-<script>
-  const isAndroid = /android/i.test(navigator.userAgent);
-  if (!isAndroid) {
-    document.querySelector('.install-android').style.display = 'none';
-  }
-</script>
-
 
 <div id="ios-msg" style="display:none;">
 ➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
@@ -178,10 +170,33 @@
   </script>
 
 
+
+</div>
+<script>
+  const isAndroid = /android/i.test(navigator.userAgent);
+  if (!isAndroid) {
+    document.querySelector('.install-android').style.display = 'none';
+  }
+</script>
+
+
 <script>
   if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
     document.getElementById('ios-msg').style.display = 'block';
   }
+</script>
+
+
+<script>
+function ajustarPadding() {
+  const player = document.getElementById('audio-player');
+  if (!player) return;
+  const h = player.offsetHeight;
+  document.body.style.paddingBottom = (h + 20) + 'px'; // +20px extra para safe-area
+}
+
+window.addEventListener('load', ajustarPadding);
+window.addEventListener('resize', ajustarPadding);
 </script>
 
 
