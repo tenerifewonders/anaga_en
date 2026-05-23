@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v20";
+const CACHE_NAME = "anaga-cache-v21";
 
 const ASSETS = [
   "./",
@@ -400,6 +400,12 @@ async function handleRangeRequest(request, rangeHeader) {
 // Interceptar peticiones
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
+  
+  // Solo interceptar peticiones GET con protocolo HTTP o HTTPS (ignora chrome-extension, etc.)
+  if (event.request.method !== 'GET' || (url.protocol !== 'http:' && url.protocol !== 'https:')) {
+    return;
+  }
+
   const rangeHeader = event.request.headers.get('range');
 
   // 1) Si es una petición de audio (Supabase o terminación .wav)
