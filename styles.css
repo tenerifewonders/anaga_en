@@ -57,3 +57,11 @@ audio {
   border: none;
   border-radius: 12px;
 }
+
+
+#audio-player {
+  width: 100%;
+  min-height: 60px; /* evita que Chrome Desktop lo colapse */
+  display: block;
+}
+
