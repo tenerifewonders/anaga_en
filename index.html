@@ -20,7 +20,9 @@
     #audio-list { padding: 15px; list-style: none; margin: 0; }
     #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
     #audio-list li:hover { background: #f0f0f0; }
-    #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; }
+    #audio-player { width: 100%; position: fixed; bottom: 0; left: 0;
+                    min-height: 60px; /* evita colapso */
+                    display: block;   /* evita que Chrome lo oculte */ }
   </style>
 </head>
 
