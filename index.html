@@ -15,16 +15,36 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body { margin: 0; font-family: sans-serif; padding-bottom: 80px; /*espacio para el player*/ }
+    body { margin: 0; font-family: sans-serif; padding-bottom: 90px; /*espacio para el player*/ }
     #map { height: 50vh; width: 100%; }
     #audio-list { padding: 15px; list-style: none; margin: 0; }
     #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
     #audio-list li:hover { background: #f0f0f0; }
     #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; z-index: 9999; /*para que se vea en android*/}
+    
+    /* PWA Debug Status Badge */
+    #pwa-status-badge {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      z-index: 10000;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      color: white;
+    }
+    .pwa-active { background: #28a745; }
+    .pwa-inactive { background: #dc3545; }
+    .pwa-pending { background: #ffc107; color: #333 !important; }
   </style>
 </head>
 
 <body>
+
+  <!-- PWA Debug Badge -->
+  <div id="pwa-status-badge" class="pwa-pending">PWA: Checking...</div>
 
   <!-- MAPA -->
   <div id="map"></div>
@@ -162,22 +182,42 @@
     });
   </script>
 
-  <!-- Service Worker -->
+  <!-- Service Worker & Debug Status -->
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js");
+    const badge = document.getElementById('pwa-status-badge');
+
+    if (window.location.protocol === 'file:') {
+      badge.textContent = "PWA: Offline Inactive (Open via Local Server)";
+      badge.className = "pwa-inactive";
+    } else if (window.location.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && !window.location.hostname.startsWith('192.168.')) {
+      badge.textContent = "PWA: Insecure HTTP (Need HTTPS)";
+      badge.className = "pwa-inactive";
+    } else if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(reg => {
+          badge.textContent = "PWA: Active (Offline Ready)";
+          badge.className = "pwa-active";
+          console.log("Service Worker registered successfully:", reg);
+        })
+        .catch(err => {
+          badge.textContent = "PWA: Error (" + err.message + ")";
+          badge.className = "pwa-inactive";
+          console.error("Service Worker registration failed:", err);
+        });
+    } else {
+      badge.textContent = "PWA: Not supported in this browser";
+      badge.className = "pwa-inactive";
     }
   </script>
 
-
-<script>
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
-    document.getElementById('ios-msg').style.display = 'block';
-  }
-  if (/android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
-    document.getElementById('android-msg').style.display = 'block';
-  }
-</script>
+  <script>
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
+      document.getElementById('ios-msg').style.display = 'block';
+    }
+    if (/android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('android-msg').style.display = 'block';
+    }
+  </script>
 
 
 </body>
