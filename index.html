@@ -15,7 +15,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body { margin: 0; font-family: sans-serif; padding-bottom: 60px; /*espacio para el player*/ }
+    body { margin: 0; font-family: sans-serif; padding-bottom: 80px; /*espacio para el player*/ }
     #map { height: 50vh; width: 100%; }
     #audio-list { padding: 15px; list-style: none; margin: 0; }
     #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
@@ -90,17 +90,9 @@
   </ul>
 
 
-<div class="install-android">
-➕ <strong>Open the browser menu and tap <em>Add to Home Screen</em> to install the app and access all content offline.</strong>
-
+<div id="android-msg" style="display:none;">
+➕ <strong> To install the app on Android and use it offline: Click browser menu (three dots) → Add to Home screen / Install</strong>
 </div>
-<script>
-  const isAndroid = /android/i.test(navigator.userAgent);
-  if (!isAndroid) {
-    document.querySelector('.install-android').style.display = 'none';
-  }
-</script>
-
 
 <div id="ios-msg" style="display:none;">
 ➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
@@ -181,6 +173,9 @@
 <script>
   if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
     document.getElementById('ios-msg').style.display = 'block';
+  }
+  if (/android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+    document.getElementById('android-msg').style.display = 'block';
   }
 </script>
 
