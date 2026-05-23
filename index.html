@@ -1,174 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audioguía Anaga</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anaga Offline Map</title>
 
   <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
 
-  <style>
-    body { margin: 0; font-family: sans-serif; }
-    #map { height: 50vh; width: 100%; }
-    #audio-list { padding: 15px; list-style: none; margin: 0; }
-    #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
-    #audio-list li:hover { background: #f0f0f0; }
-    #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; }
-  </style>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-
-  <!-- MAPA -->
   <div id="map"></div>
 
-<p> 📍
-  <a href="https://www.google.com/maps/dir/28.485858,-16.313423/28.535007,-16.268433/28.533007,-16.263997/28.549166,-16.206877/28.558258,-16.205677/28.560470,-16.217270/28.571198,-16.204568/28.572064,-16.192508/28.480816,-16.240959" 
-     target="_blank">
-     Google Maps route available
-  </a>
-  <span>(data connection required)</span>
-</p>
-
-<p> 📄
-  <a href="EN-ANAGA.html" target="_blank">
-     Opening hours and practical tips
-  </a>
-</p>
-
-
-  <!-- LISTA DE AUDIOS -->
-  <ul id="audio-list">
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.intro.wav">
-      0. Intro
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.1.wav">
-      1. Church of Santo Domingo de Guzmán — The Corsair’s Tomb
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.2.wav">
-      2. Old Path to Pico del Inglés — The Journey through Time
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.3.wav">
-      3. Mirador del Pico del Inglés — The Corsairs’ Balcony
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.4.wav">
-      4. Mirador del Bailadero — Where Paths Cross... and Legends
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.5.wav">
-      5. Mirador Risco Amogoje — The Smugglers’ Refuge
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.6.wav">
-      6. Taganana — The Atlantic Frontier
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.7.wav">
-      7. Roque de las Bodegas — The Port of Smuggling and Shakespeare’s Wine
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.8.wav">
-      8. Almáciga — The Roar of the Wild Sea
-    </li>
-
-    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.9.wav">
-      9. Castillo de Paso Alto — The Guardian of the Bay
-    </li>
-
-  </ul>
-<br>
-
-<div id="ios-msg" style="display:none;">
-➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
-</div>
-
-<br>
-<br>
-
-  <!-- PLAYER -->
-  <audio id="audio-player" controls controlsList="nodownload"></audio>
-
-  <script>
-    // Inicializar mapa
-    const map = L.map('map', {
-  attributionControl: false
-}).setView([28.535, -16.245], 12);
-
-
-    // Tiles locales
-    L.tileLayer('./tiles/{z}/{x}/{y}.png', {
-      minZoom: 11,
-      maxZoom: 14,
-      tileSize: 256
-    }).addTo(map);
-
-    // Cargar puntos desde GeoJSON
-    fetch('./ANAGA.geojson')
-      .then(res => res.json())
-      .then(data => {
-        const player = document.getElementById("audio-player");
-
-        L.geoJSON(data, {
-          onEachFeature: (feature, layer) => {
-            const audioUrl = feature.properties.audio;
-            const name = feature.properties.Name;
-
-            layer.bindPopup(name);
-
-            layer.on("click", () => {
-              player.src = audioUrl;
-              player.play();
-            });
-          }
-        }).addTo(map);
-      });
-
-    // Activar lista de audios
-    const player = document.getElementById("audio-player");
-    const items = document.querySelectorAll("#audio-list li");
-
-    items.forEach(li => {
-      li.addEventListener("click", () => {
-        const url = li.getAttribute("data-audio");
-        player.src = url;
-        player.play();
-      });
-    });
-
-    // Geolocalización
-    map.locate({ setView: false });
-
-    map.on('locationfound', e => {
-      L.circleMarker(e.latlng, {
-        radius: 8,
-        color: "#007bff",
-        fillColor: "#3fa0ff",
-        fillOpacity: 0.8
-      }).addTo(map);
-    });
-  </script>
-
-  <!-- Service Worker -->
+  <script src="./app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
-
-
-<script>
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
-    document.getElementById('ios-msg').style.display = 'block';
-  }
-</script>
-
-
 </body>
 </html>

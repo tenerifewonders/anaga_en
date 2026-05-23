@@ -1,33 +1,27 @@
-// URL del route.json en tu Netlify o Supabase
-const ROUTE_URL = "./route.json";
+// Crear mapa centrado en Anaga
+const map = L.map('map', {
+  zoomControl: true,
+  minZoom: 10,
+  maxZoom: 16
+}).setView([28.526, -16.247], 13);
 
-async function loadGuide() {
-  try {
-    const response = await fetch(ROUTE_URL);
-    const tracks = await response.json();
+// Tiles locales
+L.tileLayer('./tiles/{z}/{x}/{y}.png', {
+  tileSize: 256,
+  minZoom: 10,
+  maxZoom: 16,
+  attribution: 'Map data © OpenStreetMap contributors'
+}).addTo(map);
 
-    // Título y descripción (puedes personalizarlo aquí)
-    document.getElementById("guide-title").textContent = "Anaga";
-    document.getElementById("guide-description").textContent = "The Pirate Coast";
-
-    const tracksContainer = document.getElementById("tracks");
-    tracksContainer.innerHTML = "";
-
-    tracks.forEach(track => {
-      const div = document.createElement("div");
-      div.className = "track";
-
-      div.innerHTML = `
-        <div class="track-title">${track.title}</div>
-        <audio controls src="${track.audio_url}"></audio>
-      `;
-
-      tracksContainer.appendChild(div);
-    });
-
-  } catch (error) {
-    console.error("Error cargando la audioguía:", error);
-  }
-}
-
-loadGuide();
+// Cargar GeoJSON
+fetch('./ANAGA.geojson')
+  .then(res => res.json())
+  .then(data => {
+    L.geoJSON(data, {
+      onEachFeature: (feature, layer) => {
+        if (feature.properties && feature.properties.name) {
+          layer.bindPopup(feature.properties.name);
+        }
+      }
+    }).addTo(map);
+  });

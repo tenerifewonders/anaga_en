@@ -50,9 +50,32 @@ audio {
   margin-top: 10px;
 }
 
+/* ====== MAPA INTEGRADO (TU ESTILO) ====== */
 
 .mapa-integrado iframe {
   width: 100%;
   max-width: 100%;
   border: none;
   border-radius: 12px;
+}
+
+/* ====== MAPA OFFLINE LEAFLET ====== */
+/* Esto es lo ÚNICO nuevo que necesitas */
+
+html, body {
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;   /* Mapa a pantalla completa */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* Ajuste para que Leaflet no rompa tu diseño */
+.leaflet-container {
+  background: #e5e5e5 !important;
+}
+

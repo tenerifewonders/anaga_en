@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v16";
+const CACHE_NAME = "anaga-cache-v17";
 
 const ASSETS = [
   "./",
@@ -10,7 +10,6 @@ const ASSETS = [
   "./icon-192.png",
   "./icon-512.png"
 ];
-
 
 // Instalar SW y cachear archivos base
 self.addEventListener("install", event => {
@@ -38,7 +37,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // 1) Cachear audios de Supabase cuando se reproducen
+  // 1) Cachear audios de Supabase
   if (url.href.includes("supabase.co/storage")) {
     event.respondWith(
       caches.match(event.request).then(cached => {
@@ -56,7 +55,7 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // 2) Cachear JSON/GeoJSON con estrategia network-first
+  // 2) Cachear JSON/GeoJSON
   if (url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson")) {
     event.respondWith(
       fetch(event.request)
@@ -71,7 +70,25 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // 3) Cache-first para assets estáticos
+  // 3) Cachear tiles locales
+  if (url.pathname.includes("/tiles/")) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        return (
+          cached ||
+          fetch(event.request).then(networkResponse => {
+            caches.open(CACHE_NAME).then(cache =>
+              cache.put(event.request, networkResponse.clone())
+            );
+            return networkResponse;
+          })
+        );
+      })
+    );
+    return;
+  }
+
+  // 4) Cache-first para assets estáticos
   event.respondWith(
     caches.match(event.request).then(cached => {
       return (
