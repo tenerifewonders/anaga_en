@@ -90,6 +90,18 @@
   </ul>
 <br>
 
+
+<div class="install-android">
+  ➕ Open the browser menu and tap <em>Add to Home Screen</em> to install the app and access all content offline.
+</div>
+<script>
+  const isAndroid = /android/i.test(navigator.userAgent);
+  if (!isAndroid) {
+    document.querySelector('.install-android').style.display = 'none';
+  }
+</script>
+
+
 <div id="ios-msg" style="display:none;">
 ➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
 </div>
