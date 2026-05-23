@@ -1,106 +1,85 @@
-const CACHE_NAME = "anaga-v1";
+const CACHE_NAME = "anaga-cache-v16";
 
-const STATIC_ASSETS = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/ANAGA.geojson",
-  "/EN-ANAGA.html",
-  "/leaflet.css",
-  "/leaflet.js",
-  "/icon-192.png",
-  "/icon-512.png"
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./app.js",
+  "./ANAGA.geojson",
+  "./manifest.json",
+  "./styles.css",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 
-// INSTALL
+// Instalar SW y cachear archivos base
 self.addEventListener("install", event => {
-
   event.waitUntil(
-
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
-
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-
   self.skipWaiting();
-
 });
 
-
-// ACTIVATE
+// Activar SW y limpiar versiones antiguas
 self.addEventListener("activate", event => {
-
   event.waitUntil(
-
     caches.keys().then(keys =>
-
       Promise.all(
-
-        keys.map(key => {
-
-          if (key !== CACHE_NAME) {
-
-            return caches.delete(key);
-
-          }
-
-        })
-
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       )
-
     )
-
   );
-
   self.clients.claim();
-
 });
 
-
-// FETCH
+// Interceptar peticiones
 self.addEventListener("fetch", event => {
+  const url = new URL(event.request.url);
 
-  event.respondWith(
-
-    caches.match(event.request)
-
-      .then(cached => {
-
-        if (cached) {
-
-          return cached;
-
-        }
-
-        return fetch(event.request)
-
-          .then(response => {
-
-            // SAVE TO CACHE
-            const clone = response.clone();
-
-            caches.open(CACHE_NAME)
-
-              .then(cache => {
-
-                cache.put(event.request, clone);
-
-              });
-
-            return response;
-
+  // 1) Cachear audios de Supabase cuando se reproducen
+  if (url.href.includes("supabase.co/storage")) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        return (
+          cached ||
+          fetch(event.request).then(networkResponse => {
+            caches.open(CACHE_NAME).then(cache =>
+              cache.put(event.request, networkResponse.clone())
+            );
+            return networkResponse;
           })
-
-          .catch(() => {
-
-            // OFFLINE FALLBACK
-            return caches.match("/index.html");
-
-          });
-
+        );
       })
+    );
+    return;
+  }
 
+  // 2) Cachear JSON/GeoJSON con estrategia network-first
+  if (url.pathname.endsWith(".json") || url.pathname.endsWith(".geojson")) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          caches.open(CACHE_NAME).then(cache =>
+            cache.put(event.request, response.clone())
+          );
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 3) Cache-first para assets estáticos
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      return (
+        cached ||
+        fetch(event.request).then(networkResponse => {
+          return networkResponse;
+        })
+      );
+    })
   );
-
 });
