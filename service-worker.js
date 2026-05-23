@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-cache-v24";
+const CACHE_NAME = "anaga-en-v4";
 
 const ASSETS = [
   "./",
@@ -316,7 +316,7 @@ const TILES = [
   "./tiles/14/7456/6840.png"
 ];
 
-// Helper para cachear de forma tolerante a fallos individuales (previene que un archivo roto aborte la instalación)
+// Helper para cachear de forma tolerante a fallos individuales
 async function cacheListTolerantly(cache, list) {
   for (const url of list) {
     try {
@@ -331,8 +331,9 @@ async function cacheListTolerantly(cache, list) {
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      // Usar cacheListTolerantly incluso para los assets para evitar fallos si "./" devuelve 404 o listado de directorio.
-      await cacheListTolerantly(cache, ASSETS);
+      // 1) Cargar los archivos críticos. Si falla alguno de estos, falla la instalación.
+      await cache.addAll(ASSETS);
+      // 2) Cachear los audios y los tiles de forma tolerante (uno a uno) en background.
       cacheListTolerantly(cache, AUDIO_URLS);
       cacheListTolerantly(cache, TILES);
     })
@@ -402,17 +403,6 @@ self.addEventListener("fetch", event => {
   
   // Solo interceptar peticiones GET con protocolo HTTP o HTTPS (ignora chrome-extension, etc.)
   if (event.request.method !== 'GET' || (url.protocol !== 'http:' && url.protocol !== 'https:')) {
-    return;
-  }
-
-  // Fallback para solicitudes de la raíz del directorio "./" o "/"
-  // Si no está en caché la solicitud de la raíz, devolver "./index.html" de la caché
-  if (url.pathname.endsWith("/")) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        return cached || caches.match("./index.html") || fetch(event.request);
-      })
-    );
     return;
   }
 
