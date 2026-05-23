@@ -2,7 +2,7 @@
   "name": "Anaga Explorador Audioguía",
   "short_name": "Anaga Audio",
   "description": "Explora Anaga con nuestra audioguía inmersiva.",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0d0d12",
   "theme_color": "#121212",
