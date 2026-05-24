@@ -18,9 +18,21 @@
     body { margin: 0; font-family: sans-serif; padding-bottom: 80px; /*espacio para el player*/ }
     #map { height: 50vh; width: 100%; }
     #audio-list { padding: 15px; list-style: none; margin: 0; }
-    #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: all 0.2s ease; }
     #audio-list li:hover { background: #f0f0f0; }
+    #audio-list li.active-track {
+      background: #e3f2fd;
+      border-left: 5px solid #007bff;
+      font-weight: bold;
+      color: #0056b3;
+    }
     #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; z-index: 9999; /*para que se vea en android*/}
+    
+    /* Clase para destacar el marker activo en rojo */
+    .marker-active {
+      filter: hue-rotate(140deg) saturate(2.5) brightness(0.9) !important;
+      z-index: 1000 !important;
+    }
   </style>
 </head>
 
@@ -103,9 +115,8 @@
   <script>
     // Inicializar mapa
     const map = L.map('map', {
-  attributionControl: false
-}).setView([28.535, -16.245], 12);
-
+      attributionControl: false
+    }).setView([28.535, -16.245], 12);
 
     // Tiles locales
     L.tileLayer('./tiles/{z}/{x}/{y}.png', {
@@ -114,12 +125,61 @@
       tileSize: 256
     }).addTo(map);
 
+    // Diccionario de marcadores vinculados por audio URL
+    const markersByAudio = {};
+    let activeMarker = null;
+
+    // Función unificada para activar pista (audio, lista y marcador en mapa)
+    function activateTrack(audioUrl, triggerSource) {
+      const player = document.getElementById("audio-player");
+      
+      // 1) Reproducir audio
+      if (player.src !== audioUrl) {
+        player.src = audioUrl;
+        player.play();
+      } else if (player.paused) {
+        player.play();
+      }
+
+      // 2) Activar visualmente en la lista
+      const items = document.querySelectorAll("#audio-list li");
+      items.forEach(li => {
+        if (li.getAttribute("data-audio") === audioUrl) {
+          li.classList.add("active-track");
+          if (triggerSource !== 'list') {
+            li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          li.classList.remove("active-track");
+        }
+      });
+
+      // 3) Activar en el mapa
+      const marker = markersByAudio[audioUrl];
+      if (marker) {
+        // Quitar color al marcador activo anterior
+        if (activeMarker && activeMarker._icon) {
+          activeMarker._icon.classList.remove("marker-active");
+        }
+
+        // Asignar color al nuevo marcador
+        activeMarker = marker;
+        if (marker._icon) {
+          marker._icon.classList.add("marker-active");
+        }
+
+        // Si el click no se originó en el propio marcador, centrar y abrir popup
+        if (triggerSource !== 'marker') {
+          marker.openPopup();
+          map.setView(marker.getLatLng(), map.getZoom() < 13 ? 13 : map.getZoom(), { animate: true });
+        }
+      }
+    }
+
     // Cargar puntos desde GeoJSON
     fetch('./ANAGA.geojson')
       .then(res => res.json())
       .then(data => {
-        const player = document.getElementById("audio-player");
-
         L.geoJSON(data, {
           onEachFeature: (feature, layer) => {
             const audioUrl = feature.properties.audio;
@@ -127,23 +187,26 @@
 
             layer.bindPopup(name);
 
+            // Guardar marcador en el diccionario si tiene audio asignado
+            if (audioUrl) {
+              markersByAudio[audioUrl] = layer;
+            }
+
             layer.on("click", () => {
-              player.src = audioUrl;
-              player.play();
+              activateTrack(audioUrl, 'marker');
             });
           }
         }).addTo(map);
       });
 
-    // Activar lista de audios
-    const player = document.getElementById("audio-player");
+    // Activar interacción desde la lista de audios
     const items = document.querySelectorAll("#audio-list li");
-
     items.forEach(li => {
       li.addEventListener("click", () => {
         const url = li.getAttribute("data-audio");
-        player.src = url;
-        player.play();
+        if (url) {
+          activateTrack(url, 'list');
+        }
       });
     });
 
