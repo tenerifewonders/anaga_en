@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-en-v5";
+const CACHE_NAME = "anaga-en-v6";
 
 const ASSETS = [
   "./",
