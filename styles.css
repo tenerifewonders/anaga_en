@@ -57,7 +57,3 @@ audio {
   border: none;
   border-radius: 12px;
 }
-
-.marker-active {
-  filter: hue-rotate(120deg) brightness(1.4);
-}
