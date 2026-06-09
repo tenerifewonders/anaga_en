@@ -2,319 +2,245 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anaga Audioguide</title>
-  
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#121212">
 
-  <!-- ========================================== -->
-  <!-- 🔒 SECURE LICENSE LOCK EXCLUSIVE: ANAGA_EN -->
-  <!-- ========================================== -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    document.documentElement.style.display = 'none';
-
-    const supabaseUrl = 'https://xzymbvnljudyypdyuisf.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6eW1idm5sanVkeXlwZHl1aXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MjExMDYsImV4cCI6MjA5MjA5NzEwNn0.LRCkSCRF-0rDVAFkSvImWUNas21yXHZ29pQYUUZi8RY';
-    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-    const GUIDE_ID = 'anaga_en';
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      const params = new URLSearchParams(window.location.search);
-      let license = params.get('license');
-
-      if (!license) {
-        license = localStorage.getItem(`tw_license_${GUIDE_ID}`);
-      }
-
-      if (!license) {
-        mostrarError("🔒 Access Restricted", "You need a valid license code to access this audioguide.", true);
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from('licenses')
-        .select('id')
-        .eq('license_code', license)
-        .eq('guide', GUIDE_ID) 
-        .single();
-
-      if (error || !data) {
-        localStorage.removeItem(`tw_license_${GUIDE_ID}`);
-        mostrarError("❌ Invalid License", "The provided license code is invalid or does not belong to this audioguide.", false);
-        return;
-      }
-
-      localStorage.setItem(`tw_license_${GUIDE_ID}`, license);
-      document.documentElement.style.display = '';
-      setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
-    });
-
-    function mostrarError(titulo, mensaje, mostrarBoton) {
-      const enlaceCompra = "https://tenerifewonders.github.io/"; 
-      document.documentElement.innerHTML = `
-        <div style="font-family: sans-serif; text-align: center; padding: 40px 20px; background-color: #f8f9fa; height: 100vh; box-sizing: border-box;">
-          <div style="background: white; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-            <h2 style="color: #2c3e50; margin-top: 0;">${titulo}</h2>
-            <p style="color: #666; line-height: 1.5; margin-bottom: 25px;">${mensaje}</p>
-            ${mostrarBoton ? `<a href="${enlaceCompra}" style="background: #007bff; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">Purchase Audioguide</a>` : ''}
-          </div>
-        </div>
-      `;
-      document.documentElement.style.display = '';
-    }
-  </script>
-  <!-- ========================================== -->
-
-  <!-- Estilos base y Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- ========================================== -->
+<!-- 🔒 CANDADO DE SEGURIDAD EXCLUSIVO: ANAGA_EN-->
+<!-- ========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  document.documentElement.style.display = 'none';
+
+  const supabaseUrl = 'https://xzymbvnljudyypdyuisf.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6eW1idm5sanVkeXlwZHl1aXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MjExMDYsImV4cCI6MjA5MjA5NzEwNn0.LRCkSCRF-0rDVAFkSvImWUNas21yXHZ29pQYUUZi8RY';
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  // Variable de entorno para esta guía específica
+  const GUIDE_ID = 'anaga_en';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    let license = params.get('license');
+
+    // 1. Buscamos en la memoria exclusiva de esta guía
+    if (!license) {
+      license = localStorage.getItem(`tw_license_${GUIDE_ID}`);
+    }
+
+    if (!license) {
+      mostrarError("🔒 Access Restricted", "You need a valid license code to listen to this audioguide.", true);
+      return;
+    }
+
+    // 2. Comprobamos en Supabase que la licencia existe Y PERTENECE a esta guía
+    const { data, error } = await supabaseClient
+      .from('licenses')
+      .select('id')
+      .eq('license_code', license)
+      .eq('guide', GUIDE_ID) // ¡Seguridad estricta! Tiene que coincidir con "anaga_en"
+      .single();
+
+    if (error || !data) {
+      localStorage.removeItem(`tw_license_${GUIDE_ID}`);
+      mostrarError("❌ Invalid License", "The provided code is invalid or does not belong to this audioguide.", false);
+      return;
+    }
+
+    // 3. ¡Todo correcto! Guardamos en memoria y mostramos la web
+    localStorage.setItem(`tw_license_${GUIDE_ID}`, license);
+    document.documentElement.style.display = '';
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+  });
+
+  function mostrarError(titulo, mensaje, mostrarBoton) {
+    const enlaceCompra = "https://tenerifewonders.github.io/"; 
+    document.documentElement.innerHTML = `
+      <div style="font-family: sans-serif; text-align: center; padding: 40px 20px; background-color: #f8f9fa; height: 100vh; box-sizing: border-box;">
+        <div style="background: white; max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <h2 style="color: #2c3e50; margin-top: 0;">${titulo}</h2>
+          <p style="color: #666; line-height: 1.5; margin-bottom: 25px;">${mensaje}</p>
+          ${mostrarBoton ? `<a href="${enlaceCompra}" style="background: #007bff; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">Purchase Audioguide</a>` : ''}
+        </div>
+      </div>
+    `;
+    document.documentElement.style.display = '';
+  }
+</script>
+<!-- ========================================== -->
+ 
+
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-    }
-    header {
-      background-color: #1f1f1f;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 2px solid #333;
-    }
-    h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: #ffffff;
-    }
-    .info-bar {
-      display: flex;
-      justify-content: center;
-      background-color: #2a2a2a;
-      padding: 10px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #444;
-    }
-    .info-bar p {
-      margin: 0;
-    }
-    .info-bar a {
-      color: #4da8da;
-      text-decoration: none;
+    body { margin: 0; font-family: sans-serif; padding-bottom: 60px; }
+    #map { height: 50vh; width: 100%; }
+    #audio-list { padding: 15px; list-style: none; margin: 0; }
+    #audio-list li { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: all 0.2s ease; }
+    #audio-list li:hover { background: #f0f0f0; }
+    #audio-list li.active-track {
+      background: #e3f2fd;
+      border-left: 5px solid #007bff;
       font-weight: bold;
+      color: #0056b3;
     }
-    #map {
-      flex: 1;
-      width: 100%;
-      background: #1a1a1a;
-      border-bottom: 2px solid #333;
-      z-index: 1;
-    }
-    .leaflet-tile {
-      filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-    }
-    #controls {
-      background-color: #1f1f1f;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
-    }
-    audio {
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 15px;
-      outline: none;
-    }
-    /* Estilo oscuro para el reproductor de audio */
-    audio::-webkit-media-controls-panel {
-      background-color: #2a2a2a;
-    }
-    audio::-webkit-media-controls-current-time-display,
-    audio::-webkit-media-controls-time-remaining-display {
-      color: #e0e0e0;
-    }
-    #track-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      max-width: 400px;
-      max-height: 25vh;
-      overflow-y: auto;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background-color: #2a2a2a;
-    }
-    #track-list li {
-      padding: 12px 15px;
-      cursor: pointer;
-      border-bottom: 1px solid #444;
-      transition: background-color 0.2s, color 0.2s;
-      font-size: 0.95rem;
-    }
-    #track-list li:last-child {
-      border-bottom: none;
-    }
-    #track-list li:hover {
-      background-color: #3a3a3a;
-    }
-    #track-list li.active {
-      background-color: #4da8da;
-      color: #fff;
-      font-weight: bold;
+    #audio-player { width: 100%; position: fixed; bottom: 0; left: 0; z-index: 9999; }
+    .marker-active {
+      filter: hue-rotate(140deg) saturate(2.5) brightness(0.9) !important;
+      z-index: 1000 !important;
     }
   </style>
 </head>
+
 <body>
-
-  <header>
-    <h1>Anaga Audioguide</h1>
-  </header>
-
-  <div class="info-bar">
-    <p>📄 <a href="EN-ANAGA.html" target="_blank">Opening hours and practical tips</a></p>
-  </div>
-
   <div id="map"></div>
 
-  <div id="controls">
-    <audio id="audio-player" controls>
-      Your browser does not support the audio element.
-    </audio>
-    <ul id="track-list">
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.0.mp3" class="active">0. Intro</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.1.mp3">1. Former Convent of Santo Domingo</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.2.mp3">2. Old path to Pico del Inglés</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.3.mp3">3. Pico del Inglés Viewpoint</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.4.mp3">4. Bailadero Viewpoint</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.5.mp3">5. Risco Amogoje Viewpoint</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.6.mp3">6. Taganana</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.7.mp3">7. Roque de las Bodegas</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.8.mp3">8. Almáciga Beach</li>
-      <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3">9. Paso Alto Castle</li>
-    </ul>
+  <p> 📍
+    <a href="https://www.google.com/maps/dir/28.485858,-16.313423/28.535007,-16.268433/28.533007,-16.263997/28.549166,-16.206877/28.558258,-16.205677/28.560470,-16.217270/28.571198,-16.204568/28.572064,-16.192508/28.480816,-16.240959" 
+     target="_blank">
+     Google Maps Route available
+  </a>
+  <span>(Data connection required)</span>
+  </p>
+
+  <p> 📄
+      <a href="EN-ANAGA.html" target="_blank">
+       Opening hours and practical tips
+    </a>
+  </p>
+
+  <div id="android-msg" style="display:none; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; margin: 10px;">
+    ➕ <strong> To install the app on Android and use it offline: Click the browser menu (three dots) → Add to Home Screen / Install</strong>
   </div>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker Registrado!', reg))
-          .catch(err => console.error('Error al registrar Service Worker', err));
-      });
-    }
+  <div id="ios-msg" style="display:none; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px; margin: 10px;">
+    ➕ <strong> To install the app on your iPhone and use it offline: Share → Add to Home Screen</strong>
+  </div>
 
-    const map = L.map('map', {
-      zoomControl: true,
-      maxBounds: [
-        [28.4000, -16.4000], 
-        [28.6000, -16.1000]  
-      ],
-      maxBoundsViscosity: 1.0,
-      minZoom: 11,
-      maxZoom: 14
-    }).setView([28.5375, -16.2166], 11);
+  <ul id="audio-list">
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.0.mp3">0. Intro</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.1.mp3">1. Former Convent of Santo Domingo</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.2.mp3">2. Old path to Pico del Inglés</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.3.mp3">3. Pico del Inglés Viewpoint</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.4.mp3">4. Bailadero Viewpoint</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.5.mp3">5. Risco Amogoje Viewpoint</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.6.mp3">6. Taganana</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.7.mp3">7. Roque de las Bodegas</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.8.mp3">8. Almáciga Beach</li>
+    <li data-audio="https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3">9. Paso Alto Castle</li>
+  </ul>
+
+  <audio id="audio-player" controls controlsList="nodownload"></audio>
+
+  <script>
+    // CENTRADO APROXIMADO DE ANAGA
+    const map = L.map('map', { attributionControl: false }).setView([28.5375, -16.2166], 12); 
 
     L.tileLayer('./tiles/{z}/{x}/{y}.png', {
       minZoom: 11,
-      maxZoom: 14,
-      tms: false,
-      errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+      maxZoom: 18,
+      tileSize: 256
     }).addTo(map);
 
-    let markers = [];
-    const audioPlayer = document.getElementById('audio-player');
-    const trackListItems = document.querySelectorAll('#track-list li');
+    const markersByAudio = {};
+    let activeMarker = null;
 
-    const DefaultIcon = L.icon({
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    function activateTrack(audioUrl, triggerSource) {
+      const player = document.getElementById("audio-player");
+      
+      if (player.src !== audioUrl) {
+        player.src = audioUrl;
+        player.play();
+      } else if (player.paused) {
+        player.play();
+      }
 
-    const ActiveIcon = L.icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+      const items = document.querySelectorAll("#audio-list li");
+      items.forEach(li => {
+        if (li.getAttribute("data-audio") === audioUrl) {
+          li.classList.add("active-track");
+          if (triggerSource !== 'list') {
+            li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          li.classList.remove("active-track");
+        }
+      });
 
-    L.Marker.prototype.options.icon = DefaultIcon;
-
-    function selectTrack(item, marker) {
-      trackListItems.forEach(li => li.classList.remove('active'));
-      item.classList.add('active');
-
-      markers.forEach(m => m.setIcon(DefaultIcon));
+      const marker = markersByAudio[audioUrl];
       if (marker) {
-        marker.setIcon(ActiveIcon);
-        map.setView(marker.getLatLng(), 14, { animate: true });
-        marker.openPopup();
+        if (activeMarker && activeMarker._icon) {
+          activeMarker._icon.classList.remove("marker-active");
+        }
+        activeMarker = marker;
+        if (marker._icon) {
+          marker._icon.classList.add("marker-active");
+        }
+        if (triggerSource !== 'marker') {
+          marker.openPopup();
+          map.setView(marker.getLatLng(), map.getZoom() < 13 ? 13 : map.getZoom(), { animate: true });
+        }
       }
-
-      const audioSrc = item.getAttribute('data-audio');
-      if (audioPlayer.src !== audioSrc) {
-        audioPlayer.src = audioSrc;
-      }
-      audioPlayer.play().catch(e => console.log("Auto-play prevenido", e));
     }
 
-    trackListItems.forEach((item, index) => {
-      item.addEventListener('click', () => {
-        const marker = index > 0 ? markers[index - 1] : null;
-        selectTrack(item, marker);
+    fetch('./ANAGA.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          onEachFeature: (feature, layer) => {
+            let audioUrl = feature.properties.audio;
+            if (audioUrl) audioUrl = audioUrl.replace('.wav', '.mp3');
+            
+            const name = feature.properties.Name;
+            layer.bindPopup(name);
+
+            if (audioUrl) {
+              markersByAudio[audioUrl] = layer;
+            }
+            layer.on("click", () => {
+              activateTrack(audioUrl, 'marker');
+            });
+          }
+        }).addTo(map);
+      });
+
+    const items = document.querySelectorAll("#audio-list li");
+    items.forEach(li => {
+      li.addEventListener("click", () => {
+        const url = li.getAttribute("data-audio");
+        if (url) {
+          activateTrack(url, 'list');
+        }
       });
     });
 
-    fetch('./ANAGA.geojson')
-      .then(response => {
-        if (!response.ok) throw new Error("GeoJSON no encontrado");
-        return response.json();
-      })
-      .then(data => {
-        L.geoJSON(data, {
-          pointToLayer: function (feature, latlng) {
-            const marker = L.marker(latlng);
-            marker.bindPopup(`<b>${feature.properties.Name}</b>`);
-            
-            marker.on('click', () => {
-              let audioUrl = feature.properties.audio;
-              if (audioUrl) {
-                audioUrl = audioUrl.replace('.wav', '.mp3'); 
-                const matchingListItem = Array.from(trackListItems).find(
-                  li => li.getAttribute('data-audio').includes(audioUrl) || audioUrl.includes(li.getAttribute('data-audio'))
-                );
-                if (matchingListItem) {
-                  selectTrack(matchingListItem, marker);
-                }
-              }
-            });
+    map.locate({ setView: false });
+    map.on('locationfound', e => {
+      L.circleMarker(e.latlng, {
+        radius: 8, color: "#007bff", fillColor: "#3fa0ff", fillOpacity: 0.8
+      }).addTo(map);
+    });
+  </script>
 
-            markers.push(marker);
-            return marker;
-          }
-        }).addTo(map);
-
-        if (trackListItems.length > 0) {
-          audioPlayer.src = trackListItems[0].getAttribute('data-audio');
-        }
-      })
-      .catch(error => console.error('Error cargando el GeoJSON:', error));
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+  <script>
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
+      document.getElementById('ios-msg').style.display = 'block';
+    }
+    if (/android/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('android-msg').style.display = 'block';
+    }
   </script>
 </body>
 </html>
