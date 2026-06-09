@@ -52,7 +52,7 @@
 
     if (error || !data) {
       localStorage.removeItem(`tw_license_${GUIDE_ID}`);
-      mostrarError("❌ Invalid License", "The provided code is invalid or does not belong to this audioguide.", false);
+      mostrarError("❌ Invalid License", "The provided code is invalid or does not belong to this audioguide.", true);
       return;
     }
 
