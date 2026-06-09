@@ -1,12 +1,23 @@
 {
   "type": "FeatureCollection",
-  "name": "Capa sin nombre",
+  "name": "Anaga English Stops",
   "features": [
     {
       "type": "Feature",
       "properties": {
-        "Name": "1. Antiguo Convento de Santo Domingo",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.1.wav"
+        "Name": "0. Intro",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.0.mp3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-16.313500, 28.485900, 0.0]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "1. Former Convent of Santo Domingo",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.1.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -16,8 +27,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "2. Camino viejo al pico del inglés",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.2.wav"
+        "Name": "2. Old path to Pico del Inglés",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.2.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -27,8 +38,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "3. Mirador Pico del Inglés",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.3.wav"
+        "Name": "3. Pico del Inglés Viewpoint",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.3.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -38,8 +49,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "4. Mirador Bailadero",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.4.wav"
+        "Name": "4. Bailadero Viewpoint",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.4.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -49,8 +60,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "5. Mirador Risco Amogoje",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.5.wav"
+        "Name": "5. Risco Amogoje Viewpoint",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.5.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -61,7 +72,7 @@
       "type": "Feature",
       "properties": {
         "Name": "6. Taganana",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.6.wav"
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.6.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -72,7 +83,7 @@
       "type": "Feature",
       "properties": {
         "Name": "7. Roque de las Bodegas",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.7.wav"
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.7.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -82,8 +93,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "8. Playa de Almáciga",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.8.wav"
+        "Name": "8. Almáciga Beach",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.8.mp3"
       },
       "geometry": {
         "type": "Point",
@@ -93,8 +104,8 @@
     {
       "type": "Feature",
       "properties": {
-        "Name": "9. Castillo de Paso Alto",
-        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/audioguides/Anaga.9.wav"
+        "Name": "9. Paso Alto Castle",
+        "audio": "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3"
       },
       "geometry": {
         "type": "Point",
