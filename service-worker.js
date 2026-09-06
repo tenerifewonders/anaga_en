@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-en-v3";
+const CACHE_NAME = "anaga-en-v4";
 
 const ASSETS = [
 "./",
@@ -26,7 +26,7 @@ const AUDIO_URLS = [
 ];
 
 const TILES = [
-  "./tiles/11/927/853.png",
+"./tiles/11/927/853.png",
   "./tiles/11/927/854.png",
   "./tiles/11/927/855.png",
   "./tiles/11/927/856.png",
@@ -316,15 +316,16 @@ const TILES = [
   "./tiles/14/7456/6840.png"
 ];
 
-// 1. INSTALL: Pre-cache static assets and all audio files for offline use
+// 1. INSTALL: Pre-cache static assets, audio files, and map tiles for 100% offline use
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      console.log("[SW] Pre-caching assets and audio for offline...");
+      console.log("[SW] Pre-caching static assets...");
       await cache.addAll(ASSETS).catch(err => console.warn("[SW] Asset pre-cache warning:", err));
       
-      // Pre-fetch all audio files with clean GET requests (no range header) to ensure 200 OK status
+      // Pre-fetch all audio files with clean GET requests
+      console.log("[SW] Pre-caching audio files...");
       for (const url of AUDIO_URLS) {
         try {
           const req = new Request(url, { method: "GET" });
@@ -337,15 +338,32 @@ self.addEventListener("install", (e) => {
         }
       }
 
-      // Pre-cache tiles if available
+      // Pre-fetch all map tiles individually (so 1 missing tile never breaks the rest)
       if (TILES.length > 0) {
-        await cache.addAll(TILES).catch(err => console.warn("[SW] Tiles pre-cache warning:", err));
+        console.log("[SW] Pre-caching map tiles (" + TILES.length + " tiles)...");
+        for (const tileUrl of TILES) {
+          try {
+            const req = new Request(tileUrl, { method: "GET" });
+            const res = await fetch(req);
+            if (res && res.status === 200) {
+              await cache.put(tileUrl, res);
+              // Also store under relative path
+              if (tileUrl.startsWith("./")) {
+                const cleanRel = tileUrl.substring(1);
+                const fullAbs = self.location.origin + self.location.pathname.replace(/[^/]*$/, "") + cleanRel.substring(1);
+                await cache.put(fullAbs, res.clone());
+              }
+            }
+          } catch (err) {
+            // Ignore single tile fetch warnings
+          }
+        }
       }
     })
   );
 });
 
-// 2. ACTIVATE: Clean old caches & claim clients
+// 2. ACTIVATE: Clean old caches & claim clients immediately
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
@@ -358,17 +376,23 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// 3. FETCH: Smart Cache & HTTP Range Request handler for HTML5 <audio> offline playback
+// 3. FETCH: Smart Cache handler for Audio (Range requests) and Map Tiles
 self.addEventListener("fetch", (e) => {
   const url = e.request.url;
 
-  // Intercept audio requests (MP3s) or Supabase audio storage URLs
+  // A. Intercept audio requests (MP3s) or Supabase audio storage URLs
   if (url.endsWith(".mp3") || url.includes("supabase.co/storage/v1/object/public/")) {
     e.respondWith(handleAudioFetch(e.request));
     return;
   }
 
-  // Standard static assets & tiles
+  // B. Intercept Map Tiles requests (/tiles/)
+  if (url.includes("/tiles/")) {
+    e.respondWith(handleTileFetch(e.request));
+    return;
+  }
+
+  // C. Standard static assets
   e.respondWith(
     caches.match(e.request).then((cachedRes) => {
       if (cachedRes) return cachedRes;
@@ -388,12 +412,40 @@ self.addEventListener("fetch", (e) => {
   );
 });
 
+// Helper: Handle Map Tiles offline fetching & URL matching
+async function handleTileFetch(request) {
+  const cache = await caches.open(CACHE_NAME);
+  
+  // 1. Check exact request match
+  let cached = await cache.match(request);
+  if (cached) return cached;
+
+  // 2. Check by relative tile path (./tiles/z/x/y.png)
+  const tilePart = request.url.substring(request.url.indexOf("/tiles/"));
+  const relTilePath = "." + tilePart;
+  cached = await cache.match(relTilePath);
+  if (cached) return cached;
+
+  // 3. If online, fetch and cache
+  try {
+    const netRes = await fetch(request);
+    if (netRes && netRes.status === 200) {
+      await cache.put(request, netRes.clone());
+      await cache.put(relTilePath, netRes.clone());
+    }
+    return netRes;
+  } catch (err) {
+    console.warn("[SW] Tile offline & not cached:", request.url);
+    // Return empty transparent 256x256 PNG if tile missing offline
+    return new Response("", { status: 404 });
+  }
+}
+
 // Helper: Handle HTTP Range Requests for cached audio files (iOS Safari & Android Chrome)
 async function handleAudioFetch(request) {
   const cache = await caches.open(CACHE_NAME);
   let response = await cache.match(request.url);
 
-  // If not cached yet, fetch online with clean GET
   if (!response) {
     try {
       const cleanReq = new Request(request.url, { method: "GET" });
@@ -410,7 +462,6 @@ async function handleAudioFetch(request) {
     }
   }
 
-  // Handle Range Header for HTML5 <audio>
   const rangeHeader = request.headers.get("range");
   if (rangeHeader && response) {
     const arrayBuffer = await response.clone().arrayBuffer();
