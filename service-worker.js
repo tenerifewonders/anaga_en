@@ -1,6 +1,7 @@
-const CACHE_NAME = "anaga-en-v10";
+const CACHE_NAME = "anaga-en-v11";
 
-const ASSETS = [
+// 1. Core App Shell (Lightweight - installs in <300ms)
+const CORE_ASSETS = [
   "./",
   "./index.html",
   "./ANAGA.geojson",
@@ -9,7 +10,23 @@ const ASSETS = [
   "./icon-512.png",
   "./EN-ANAGA.html",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+];
+
+const AUDIO_URLS = [
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.0.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.1.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.2.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.3.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.4.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.5.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.6.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.7.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.8.mp3",
+  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3"
+];
+
+const TILE_URLS = [
   "./tiles/11/927/853.png",
   "./tiles/11/927/854.png",
   "./tiles/11/927/855.png",
@@ -300,62 +317,20 @@ const ASSETS = [
   "./tiles/14/7456/6840.png"
 ];
 
-const AUDIO_URLS = [
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.0.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.1.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.2.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.3.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.4.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.5.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.6.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.7.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.8.mp3",
-  "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3"
-];
-
-// 1. INSTALL: Pre-cache 100% of assets, map tiles, and audio MP3s
+// 1. INSTALL: Instant installation of core app shell
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log("[SW] Pre-caching 100% of map tiles and assets...");
-      
-      // Download all assets & tiles individually so 1 error never stops the rest
-      for (const assetUrl of ASSETS) {
-        try {
-          const res = await fetch(assetUrl);
-          if (res && res.status === 200) {
-            await cache.put(assetUrl, res);
-          }
-        } catch (err) {
-          console.warn("[SW] Asset pre-cache warning:", assetUrl, err);
-        }
-      }
-
-      // Pre-fetch all audio files
-      console.log("[SW] Pre-caching audio MP3s...");
-      for (const url of AUDIO_URLS) {
-        try {
-          const req = new Request(url, { method: "GET" });
-          const res = await fetch(req);
-          if (res && res.status === 200) {
-            await cache.put(url, res);
-          }
-        } catch (err) {
-          console.warn("[SW] Audio pre-cache warning:", url, err);
-        }
-      }
-
-      // Notify open windows/clients that cache is complete
-      const clientsList = await self.clients.matchAll();
-      for (const client of clientsList) {
-        client.postMessage({ type: "CACHE_COMPLETE" });
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("[SW] Pre-caching core app shell...");
+      return cache.addAll(CORE_ASSETS).catch((err) => {
+        console.warn("[SW] App shell pre-cache warning:", err);
+      });
     })
   );
 });
 
-// 2. ACTIVATE: Clean old caches & claim clients
+// 2. ACTIVATE: Clean old caches, claim clients & run parallel background pre-cache
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
@@ -366,19 +341,72 @@ self.addEventListener("activate", (e) => {
       )
     ).then(() => self.clients.claim())
   );
+
+  // Background caching of all audio files & map tiles (non-blocking)
+  preCacheOfflineContent();
 });
 
-// 3. FETCH: Standard Cache-First for Assets/Tiles + HTTP Range Request handler for MP3 Audios
+// Message listener for skip waiting
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+// Fast parallel batch precaching function
+async function preCacheOfflineContent() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    console.log("[SW] Starting background precache for tiles and audio...");
+
+    // Helper for fast parallel batch fetch
+    async function fetchBatch(urls, batchSize) {
+      for (let i = 0; i < urls.length; i += batchSize) {
+        const batch = urls.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (url) => {
+            try {
+              const req = url.endsWith(".mp3") ? new Request(url, { method: "GET" }) : url;
+              const res = await fetch(req);
+              if (res && res.status === 200) {
+                await cache.put(url, res);
+              }
+            } catch (err) {
+              // Silently ignore individual tile/audio network glitches
+            }
+          })
+        );
+      }
+    }
+
+    // Pre-cache all audio MP3 files (3 at a time)
+    await fetchBatch(AUDIO_URLS, 3);
+    // Pre-cache all map tile PNGs (15 at a time)
+    await fetchBatch(TILE_URLS, 15);
+
+    console.log("[SW] Background precache complete! Notifying app...");
+
+    // Notify all open client tabs/windows
+    const clientsList = await self.clients.matchAll();
+    for (const client of clientsList) {
+      client.postMessage({ type: "CACHE_COMPLETE" });
+    }
+  } catch (err) {
+    console.warn("[SW] Background precache warning:", err);
+  }
+}
+
+// 3. FETCH: Smart Cache-First for Assets/Tiles + HTTP Range Request Handler for Audios
 self.addEventListener("fetch", (e) => {
   const url = e.request.url;
 
-  // Audio Range Request Handler
+  // Audio Range Request Handler for HTML5 Audio (iOS & Android)
   if (url.endsWith(".mp3") || url.includes("supabase.co/storage/v1/object/public/")) {
     e.respondWith(handleAudioFetch(e.request));
     return;
   }
 
-  // Cache First for Map Tiles & Assets
+  // Cache-First strategy for Map Tiles & App Assets
   e.respondWith(
     caches.match(e.request).then((cachedRes) => {
       if (cachedRes) return cachedRes;
