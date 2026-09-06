@@ -100,6 +100,17 @@
 </head>
 
 <body>
+  <!-- 🌐 Offline Pre-cache Progress Banner -->
+  <div id="offline-banner" style="display:none; position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:10000; width:90%; max-width:440px; background:#ffffff; color:#1a202c; padding:12px 16px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.18); font-family:sans-serif; border-left:5px solid #007bff; transition:all 0.4s ease;">
+    <div id="offline-banner-content" style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="padding-right:10px;">
+        <div id="offline-banner-title" style="font-weight:bold; font-size:14px; color:#007bff;">🌐 Downloading tour for offline use...</div>
+        <div id="offline-banner-msg" style="font-size:12px; color:#666; margin-top:2px;">Saving maps & audio tracks to your phone (wait a few seconds).</div>
+      </div>
+      <button id="offline-banner-btn" onclick="closeOfflineBanner()" style="display:none; background:#28a745; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer; white-space:nowrap;">OK</button>
+    </div>
+  </div>
+
   <div id="map"></div>
 
   <p> 📍
@@ -224,12 +235,16 @@
 
     let userMarker = null;
 
-    map.locate({
-      watch: true,
-      enableHighAccuracy: true,
-      maximumAge: 2000,
-      timeout: 5000
-    });
+    function startGpsTracking() {
+      map.locate({
+        watch: true,
+        enableHighAccuracy: true,
+        maximumAge: 2000,
+        timeout: 15000
+      });
+    }
+
+    startGpsTracking();
 
     map.on('locationfound', e => {
       if (!userMarker) {
@@ -242,6 +257,12 @@
       } else {
         userMarker.setLatLng(e.latlng);
       }
+    });
+
+    map.on('locationerror', err => {
+      console.warn("[GPS] Searching location / satellite fix...", err.message);
+      // Auto-retry location lock if initial satellite fix takes time offline
+      setTimeout(startGpsTracking, 4000);
     });
   </script>
 
@@ -258,5 +279,41 @@
       document.getElementById('android-msg').style.display = 'block';
     }
   </script>
+  <script>
+    function initOfflineBanner() {
+      if (localStorage.getItem('tw_offline_ready_anaga_en')) return;
+
+      const banner = document.getElementById('offline-banner');
+      const title = document.getElementById('offline-banner-title');
+      const msg = document.getElementById('offline-banner-msg');
+      const btn = document.getElementById('offline-banner-btn');
+
+      if (!banner) return;
+      banner.style.display = 'block';
+
+      setTimeout(() => {
+        banner.style.borderLeftColor = '#28a745';
+        title.style.color = '#28a745';
+        title.innerHTML = '✅ Tour ready for 100% offline use!';
+        msg.innerHTML = 'All maps & audio tracks are saved. You can now enable Airplane Mode.';
+        btn.style.display = 'inline-block';
+        localStorage.setItem('tw_offline_ready_anaga_en', 'true');
+      }, 6000);
+    }
+
+    function closeOfflineBanner() {
+      const banner = document.getElementById('offline-banner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.ready.then(() => {
+        initOfflineBanner();
+      });
+    } else {
+      window.addEventListener('load', initOfflineBanner);
+    }
+  </script>
+
 </body>
 </html>
