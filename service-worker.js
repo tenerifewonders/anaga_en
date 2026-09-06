@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-en-v5";
+const CACHE_NAME = "anaga-en-v6";
 
 const ASSETS = [
 "./",
@@ -25,307 +25,15 @@ const AUDIO_URLS = [
   "https://xzymbvnljudyypdyuisf.supabase.co/storage/v1/object/public/anaga_en/Anaga.9.mp3"
 ];
 
-const TILES = [
-"./tiles/11/927/853.png",
-  "./tiles/11/927/854.png",
-  "./tiles/11/927/855.png",
-  "./tiles/11/927/856.png",
-  "./tiles/11/927/857.png",
-  "./tiles/11/927/858.png",
-  "./tiles/11/928/853.png",
-  "./tiles/11/928/854.png",
-  "./tiles/11/928/855.png",
-  "./tiles/11/928/856.png",
-  "./tiles/11/928/857.png",
-  "./tiles/11/928/858.png",
-  "./tiles/11/929/853.png",
-  "./tiles/11/929/854.png",
-  "./tiles/11/929/855.png",
-  "./tiles/11/929/856.png",
-  "./tiles/11/929/857.png",
-  "./tiles/11/929/858.png",
-  "./tiles/11/930/853.png",
-  "./tiles/11/930/854.png",
-  "./tiles/11/930/855.png",
-  "./tiles/11/930/856.png",
-  "./tiles/11/930/857.png",
-  "./tiles/11/930/858.png",
-  "./tiles/11/931/853.png",
-  "./tiles/11/931/854.png",
-  "./tiles/11/931/855.png",
-  "./tiles/11/931/856.png",
-  "./tiles/11/931/857.png",
-  "./tiles/11/931/858.png",
-  "./tiles/11/932/853.png",
-  "./tiles/11/932/854.png",
-  "./tiles/11/932/855.png",
-  "./tiles/11/932/856.png",
-  "./tiles/11/932/857.png",
-  "./tiles/11/932/858.png",
-  "./tiles/12/1854/1706.png",
-  "./tiles/12/1854/1707.png",
-  "./tiles/12/1854/1708.png",
-  "./tiles/12/1854/1709.png",
-  "./tiles/12/1854/1710.png",
-  "./tiles/12/1854/1711.png",
-  "./tiles/12/1854/1712.png",
-  "./tiles/12/1854/1713.png",
-  "./tiles/12/1854/1714.png",
-  "./tiles/12/1854/1715.png",
-  "./tiles/12/1854/1716.png",
-  "./tiles/12/1855/1706.png",
-  "./tiles/12/1855/1707.png",
-  "./tiles/12/1855/1708.png",
-  "./tiles/12/1855/1709.png",
-  "./tiles/12/1855/1710.png",
-  "./tiles/12/1855/1711.png",
-  "./tiles/12/1855/1712.png",
-  "./tiles/12/1855/1713.png",
-  "./tiles/12/1855/1714.png",
-  "./tiles/12/1855/1715.png",
-  "./tiles/12/1855/1716.png",
-  "./tiles/12/1856/1706.png",
-  "./tiles/12/1856/1707.png",
-  "./tiles/12/1856/1708.png",
-  "./tiles/12/1856/1709.png",
-  "./tiles/12/1856/1710.png",
-  "./tiles/12/1856/1711.png",
-  "./tiles/12/1856/1712.png",
-  "./tiles/12/1856/1713.png",
-  "./tiles/12/1856/1714.png",
-  "./tiles/12/1856/1715.png",
-  "./tiles/12/1856/1716.png",
-  "./tiles/12/1857/1706.png",
-  "./tiles/12/1857/1707.png",
-  "./tiles/12/1857/1708.png",
-  "./tiles/12/1857/1709.png",
-  "./tiles/12/1857/1710.png",
-  "./tiles/12/1857/1711.png",
-  "./tiles/12/1857/1712.png",
-  "./tiles/12/1857/1713.png",
-  "./tiles/12/1857/1714.png",
-  "./tiles/12/1857/1715.png",
-  "./tiles/12/1857/1716.png",
-  "./tiles/12/1858/1706.png",
-  "./tiles/12/1858/1707.png",
-  "./tiles/12/1858/1708.png",
-  "./tiles/12/1858/1709.png",
-  "./tiles/12/1858/1710.png",
-  "./tiles/12/1858/1711.png",
-  "./tiles/12/1858/1712.png",
-  "./tiles/12/1858/1713.png",
-  "./tiles/12/1858/1714.png",
-  "./tiles/12/1858/1715.png",
-  "./tiles/12/1858/1716.png",
-  "./tiles/12/1859/1706.png",
-  "./tiles/12/1859/1707.png",
-  "./tiles/12/1859/1708.png",
-  "./tiles/12/1859/1709.png",
-  "./tiles/12/1859/1710.png",
-  "./tiles/12/1859/1711.png",
-  "./tiles/12/1859/1712.png",
-  "./tiles/12/1859/1713.png",
-  "./tiles/12/1859/1714.png",
-  "./tiles/12/1859/1715.png",
-  "./tiles/12/1859/1716.png",
-  "./tiles/12/1860/1706.png",
-  "./tiles/12/1860/1707.png",
-  "./tiles/12/1860/1708.png",
-  "./tiles/12/1860/1709.png",
-  "./tiles/12/1860/1710.png",
-  "./tiles/12/1860/1711.png",
-  "./tiles/12/1860/1712.png",
-  "./tiles/12/1860/1713.png",
-  "./tiles/12/1860/1714.png",
-  "./tiles/12/1860/1715.png",
-  "./tiles/12/1860/1716.png",
-  "./tiles/12/1861/1706.png",
-  "./tiles/12/1861/1707.png",
-  "./tiles/12/1861/1708.png",
-  "./tiles/12/1861/1709.png",
-  "./tiles/12/1861/1710.png",
-  "./tiles/12/1861/1711.png",
-  "./tiles/12/1861/1712.png",
-  "./tiles/12/1861/1713.png",
-  "./tiles/12/1861/1714.png",
-  "./tiles/12/1861/1715.png",
-  "./tiles/12/1861/1716.png",
-  "./tiles/12/1862/1706.png",
-  "./tiles/12/1862/1707.png",
-  "./tiles/12/1862/1708.png",
-  "./tiles/12/1862/1709.png",
-  "./tiles/12/1862/1710.png",
-  "./tiles/12/1862/1711.png",
-  "./tiles/12/1862/1712.png",
-  "./tiles/12/1862/1713.png",
-  "./tiles/12/1862/1714.png",
-  "./tiles/12/1862/1715.png",
-  "./tiles/12/1862/1716.png",
-  "./tiles/12/1863/1706.png",
-  "./tiles/12/1863/1707.png",
-  "./tiles/12/1863/1708.png",
-  "./tiles/12/1863/1709.png",
-  "./tiles/12/1863/1710.png",
-  "./tiles/12/1863/1711.png",
-  "./tiles/12/1863/1712.png",
-  "./tiles/12/1863/1713.png",
-  "./tiles/12/1863/1714.png",
-  "./tiles/12/1863/1715.png",
-  "./tiles/12/1863/1716.png",
-  "./tiles/12/1864/1706.png",
-  "./tiles/12/1864/1707.png",
-  "./tiles/12/1864/1708.png",
-  "./tiles/12/1864/1709.png",
-  "./tiles/12/1864/1710.png",
-  "./tiles/12/1864/1711.png",
-  "./tiles/12/1864/1712.png",
-  "./tiles/12/1864/1713.png",
-  "./tiles/12/1864/1714.png",
-  "./tiles/12/1864/1715.png",
-  "./tiles/12/1864/1716.png",
-  "./tiles/12/1865/1706.png",
-  "./tiles/12/1865/1707.png",
-  "./tiles/12/1865/1708.png",
-  "./tiles/12/1865/1709.png",
-  "./tiles/12/1865/1710.png",
-  "./tiles/12/1865/1711.png",
-  "./tiles/12/1865/1712.png",
-  "./tiles/12/1865/1713.png",
-  "./tiles/12/1865/1714.png",
-  "./tiles/12/1865/1715.png",
-  "./tiles/12/1865/1716.png",
-  "./tiles/13/3723/3416.png",
-  "./tiles/13/3723/3417.png",
-  "./tiles/13/3723/3418.png",
-  "./tiles/13/3723/3419.png",
-  "./tiles/13/3723/3420.png",
-  "./tiles/13/3724/3416.png",
-  "./tiles/13/3724/3417.png",
-  "./tiles/13/3724/3418.png",
-  "./tiles/13/3724/3419.png",
-  "./tiles/13/3724/3420.png",
-  "./tiles/13/3725/3416.png",
-  "./tiles/13/3725/3417.png",
-  "./tiles/13/3725/3418.png",
-  "./tiles/13/3725/3419.png",
-  "./tiles/13/3725/3420.png",
-  "./tiles/13/3726/3416.png",
-  "./tiles/13/3726/3417.png",
-  "./tiles/13/3726/3418.png",
-  "./tiles/13/3726/3419.png",
-  "./tiles/13/3726/3420.png",
-  "./tiles/13/3727/3416.png",
-  "./tiles/13/3727/3417.png",
-  "./tiles/13/3727/3418.png",
-  "./tiles/13/3727/3419.png",
-  "./tiles/13/3727/3420.png",
-  "./tiles/13/3728/3416.png",
-  "./tiles/13/3728/3417.png",
-  "./tiles/13/3728/3418.png",
-  "./tiles/13/3728/3419.png",
-  "./tiles/13/3728/3420.png",
-  "./tiles/14/7447/6832.png",
-  "./tiles/14/7447/6833.png",
-  "./tiles/14/7447/6834.png",
-  "./tiles/14/7447/6835.png",
-  "./tiles/14/7447/6836.png",
-  "./tiles/14/7447/6837.png",
-  "./tiles/14/7447/6838.png",
-  "./tiles/14/7447/6839.png",
-  "./tiles/14/7447/6840.png",
-  "./tiles/14/7448/6832.png",
-  "./tiles/14/7448/6833.png",
-  "./tiles/14/7448/6834.png",
-  "./tiles/14/7448/6835.png",
-  "./tiles/14/7448/6836.png",
-  "./tiles/14/7448/6837.png",
-  "./tiles/14/7448/6838.png",
-  "./tiles/14/7448/6839.png",
-  "./tiles/14/7448/6840.png",
-  "./tiles/14/7449/6832.png",
-  "./tiles/14/7449/6833.png",
-  "./tiles/14/7449/6834.png",
-  "./tiles/14/7449/6835.png",
-  "./tiles/14/7449/6836.png",
-  "./tiles/14/7449/6837.png",
-  "./tiles/14/7449/6838.png",
-  "./tiles/14/7449/6839.png",
-  "./tiles/14/7449/6840.png",
-  "./tiles/14/7450/6832.png",
-  "./tiles/14/7450/6833.png",
-  "./tiles/14/7450/6834.png",
-  "./tiles/14/7450/6835.png",
-  "./tiles/14/7450/6836.png",
-  "./tiles/14/7450/6837.png",
-  "./tiles/14/7450/6838.png",
-  "./tiles/14/7450/6839.png",
-  "./tiles/14/7450/6840.png",
-  "./tiles/14/7451/6832.png",
-  "./tiles/14/7451/6833.png",
-  "./tiles/14/7451/6834.png",
-  "./tiles/14/7451/6835.png",
-  "./tiles/14/7451/6836.png",
-  "./tiles/14/7451/6837.png",
-  "./tiles/14/7451/6838.png",
-  "./tiles/14/7451/6839.png",
-  "./tiles/14/7451/6840.png",
-  "./tiles/14/7452/6832.png",
-  "./tiles/14/7452/6833.png",
-  "./tiles/14/7452/6834.png",
-  "./tiles/14/7452/6835.png",
-  "./tiles/14/7452/6836.png",
-  "./tiles/14/7452/6837.png",
-  "./tiles/14/7452/6838.png",
-  "./tiles/14/7452/6839.png",
-  "./tiles/14/7452/6840.png",
-  "./tiles/14/7453/6832.png",
-  "./tiles/14/7453/6833.png",
-  "./tiles/14/7453/6834.png",
-  "./tiles/14/7453/6835.png",
-  "./tiles/14/7453/6836.png",
-  "./tiles/14/7453/6837.png",
-  "./tiles/14/7453/6838.png",
-  "./tiles/14/7453/6839.png",
-  "./tiles/14/7453/6840.png",
-  "./tiles/14/7454/6832.png",
-  "./tiles/14/7454/6833.png",
-  "./tiles/14/7454/6834.png",
-  "./tiles/14/7454/6835.png",
-  "./tiles/14/7454/6836.png",
-  "./tiles/14/7454/6837.png",
-  "./tiles/14/7454/6838.png",
-  "./tiles/14/7454/6839.png",
-  "./tiles/14/7454/6840.png",
-  "./tiles/14/7455/6832.png",
-  "./tiles/14/7455/6833.png",
-  "./tiles/14/7455/6834.png",
-  "./tiles/14/7455/6835.png",
-  "./tiles/14/7455/6836.png",
-  "./tiles/14/7455/6837.png",
-  "./tiles/14/7455/6838.png",
-  "./tiles/14/7455/6839.png",
-  "./tiles/14/7455/6840.png",
-  "./tiles/14/7456/6832.png",
-  "./tiles/14/7456/6833.png",
-  "./tiles/14/7456/6834.png",
-  "./tiles/14/7456/6835.png",
-  "./tiles/14/7456/6836.png",
-  "./tiles/14/7456/6837.png",
-  "./tiles/14/7456/6838.png",
-  "./tiles/14/7456/6839.png",
-  "./tiles/14/7456/6840.png"
-];
-
-// 1. INSTALL: Pre-cache static assets, audio files, and map tiles for 100% offline use
+// 1. INSTALL: Pre-cache core app shell
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      console.log("[SW] Pre-caching static assets...");
+      console.log("[SW] Pre-caching core assets...");
       await cache.addAll(ASSETS).catch(err => console.warn("[SW] Asset pre-cache warning:", err));
       
       // Pre-fetch all audio files with clean GET requests
-      console.log("[SW] Pre-caching audio files...");
       for (const url of AUDIO_URLS) {
         try {
           const req = new Request(url, { method: "GET" });
@@ -335,24 +43,6 @@ self.addEventListener("install", (e) => {
           }
         } catch (err) {
           console.warn("[SW] Audio pre-cache warning for:", url, err);
-        }
-      }
-
-      // Pre-fetch all map tiles using clean URL resolution (NO double slash bugs)
-      if (TILES.length > 0) {
-        console.log("[SW] Pre-caching map tiles (" + TILES.length + " tiles)...");
-        for (const tileUrl of TILES) {
-          try {
-            const absUrl = new URL(tileUrl, self.location.href).href;
-            const req = new Request(absUrl, { method: "GET" });
-            const res = await fetch(req);
-            if (res && res.status === 200) {
-              await cache.put(absUrl, res.clone());
-              await cache.put(tileUrl, res);
-            }
-          } catch (err) {
-            // Ignore single tile fetch warnings
-          }
         }
       }
     })
@@ -372,32 +62,25 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// 3. FETCH: Smart Cache handler for Audio (Range requests) and Map Tiles
+// 3. FETCH: Standard Cache-First for Tiles/Assets + Range Request handler for MP3 Audios
 self.addEventListener("fetch", (e) => {
   const url = e.request.url;
 
-  // A. Intercept audio requests (MP3s) or Supabase audio storage URLs
+  // Intercept audio requests (MP3s) for Range Request offline playback
   if (url.endsWith(".mp3") || url.includes("supabase.co/storage/v1/object/public/")) {
     e.respondWith(handleAudioFetch(e.request));
     return;
   }
 
-  // B. Intercept Map Tiles requests (/tiles/)
-  if (url.includes("/tiles/")) {
-    e.respondWith(handleTileFetch(e.request));
-    return;
-  }
-
-  // C. Standard static assets
+  // Standard Assets & Map Tiles: Cache First, falling back to Network
   e.respondWith(
     caches.match(e.request).then((cachedRes) => {
       if (cachedRes) return cachedRes;
       return fetch(e.request).then((netRes) => {
-        if (!netRes || netRes.status !== 200) {
-          return netRes;
+        if (netRes && netRes.status === 200) {
+          const resToCache = netRes.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resToCache));
         }
-        const resToCache = netRes.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resToCache));
         return netRes;
       }).catch(() => {
         if (e.request.mode === "navigate") {
@@ -407,40 +90,6 @@ self.addEventListener("fetch", (e) => {
     })
   );
 });
-
-// Helper: Handle Map Tiles offline fetching & URL matching (Zero Double-Slash Bugs)
-async function handleTileFetch(request) {
-  const cache = await caches.open(CACHE_NAME);
-  
-  // 1. Check exact request match
-  let cached = await cache.match(request);
-  if (cached) return cached;
-
-  // 2. Check by resolved absolute URL
-  const absUrl = new URL(request.url, self.location.href).href;
-  cached = await cache.match(absUrl);
-  if (cached) return cached;
-
-  // 3. Check by relative tile path (./tiles/z/x/y.png)
-  const tilePart = request.url.substring(request.url.indexOf("/tiles/"));
-  const relTilePath = "." + tilePart;
-  cached = await cache.match(relTilePath);
-  if (cached) return cached;
-
-  // 4. If online, fetch and cache
-  try {
-    const netRes = await fetch(request);
-    if (netRes && netRes.status === 200) {
-      await cache.put(request, netRes.clone());
-      await cache.put(relTilePath, netRes.clone());
-      await cache.put(absUrl, netRes.clone());
-    }
-    return netRes;
-  } catch (err) {
-    console.warn("[SW] Tile offline & not cached:", request.url);
-    return new Response("", { status: 404 });
-  }
-}
 
 // Helper: Handle HTTP Range Requests for cached audio files (iOS Safari & Android Chrome)
 async function handleAudioFetch(request) {
