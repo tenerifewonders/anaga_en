@@ -274,13 +274,21 @@
         }
       });
 
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
-        }
-      });
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                        || window.navigator.standalone === true 
+                        || document.referrer.includes('android-app://');
+
+      // 📱 El pequeño salto de recarga SOLO ocurre dentro de la APP INSTALADA (Modo Standalone)
+      // 🌐 En el navegador web normal NUNCA salta ni recarga
+      if (isStandalone) {
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
     }
   </script>
   <script>
