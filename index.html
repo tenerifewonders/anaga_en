@@ -283,6 +283,16 @@
   </script>
   <script>
     function initOfflineBanner() {
+      // 📱 REGLA ESTRICTA: El banner SOLO aparece dentro de la APP INSTALADA (Modo Standalone)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                        || window.navigator.standalone === true 
+                        || document.referrer.includes('android-app://');
+
+      if (!isStandalone) {
+        // 🚫 En el navegador web NUNCA aparece
+        return;
+      }
+
       if (localStorage.getItem('tw_offline_ready_anaga_en')) return;
 
       const banner = document.getElementById('offline-banner');
@@ -296,13 +306,12 @@
       function markReady() {
         banner.style.borderLeftColor = '#28a745';
         title.style.color = '#28a745';
-        title.innerHTML = '✅ Tour ready for 100% offline use!';
+        title.innerHTML = '✅ App ready for 100% offline use!';
         msg.innerHTML = 'All 288 map tiles & audio tracks are saved on your phone. You can now enable Airplane Mode.';
         btn.style.display = 'inline-block';
         localStorage.setItem('tw_offline_ready_anaga_en', 'true');
       }
 
-      // Listen for SW message when cache completes, or timeout after 5s
       if (navigator.serviceWorker) {
         navigator.serviceWorker.addEventListener('message', (e) => {
           if (e.data && e.data.type === 'CACHE_COMPLETE') {
@@ -318,12 +327,11 @@
       if (banner) banner.style.display = 'none';
     }
 
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.ready.then(() => {
-        initOfflineBanner();
-      });
+    // ⚡ Se ejecuta al cargar el DOM pero SOLO muestra el banner si es la APP INSTALADA
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initOfflineBanner);
     } else {
-      window.addEventListener('load', initOfflineBanner);
+      initOfflineBanner();
     }
   </script>
 
