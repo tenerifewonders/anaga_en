@@ -283,16 +283,6 @@
   </script>
   <script>
     function initOfflineBanner() {
-      // 📱 STRICT CHECK: Only display banner inside INSTALLED PWA APP (Standalone mode)
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-                        || window.navigator.standalone === true 
-                        || document.referrer.includes('android-app://');
-
-      if (!isStandalone) {
-        // Hide completely when viewing in standard web browser
-        return;
-      }
-
       if (localStorage.getItem('tw_offline_ready_anaga_en')) return;
 
       const banner = document.getElementById('offline-banner');
@@ -303,15 +293,24 @@
       if (!banner) return;
       banner.style.display = 'block';
 
-      setTimeout(() => {
+      function markReady() {
         banner.style.borderLeftColor = '#28a745';
         title.style.color = '#28a745';
-        title.innerHTML = '✅ App ready for 100% offline use!';
-        msg.innerHTML = 'All maps & audio tracks are saved on your phone. You can now enable Airplane Mode.';
+        title.innerHTML = '✅ Tour ready for 100% offline use!';
+        msg.innerHTML = 'All 288 map tiles & audio tracks are saved on your phone. You can now enable Airplane Mode.';
         btn.style.display = 'inline-block';
         localStorage.setItem('tw_offline_ready_anaga_en', 'true');
-      }, 6000);
-    }, 6000);
+      }
+
+      // Listen for SW message when cache completes, or timeout after 5s
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', (e) => {
+          if (e.data && e.data.type === 'CACHE_COMPLETE') {
+            markReady();
+          }
+        });
+      }
+      setTimeout(markReady, 5000);
     }
 
     function closeOfflineBanner() {
