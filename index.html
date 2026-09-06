@@ -235,37 +235,35 @@
 
     let userMarker = null;
 
-    // Fast initial position lookup (Instant 1-second dot)
-    map.locate({ setView: false, enableHighAccuracy: false });
-
-    function startGpsTracking() {
-      map.locate({
-        watch: true,
-        enableHighAccuracy: true,
-        maximumAge: 2000,
-        timeout: 10000
-      });
-    }
-
-    startGpsTracking();
-
-    map.on('locationfound', e => {
+    function updatePosition(lat, lng) {
+      const latlng = [lat, lng];
       if (!userMarker) {
-        userMarker = L.circleMarker(e.latlng, {
+        userMarker = L.circleMarker(latlng, {
           radius: 8,
           color: "#007bff",
           fillColor: "#3fa0ff",
           fillOpacity: 0.8
         }).addTo(map);
       } else {
-        userMarker.setLatLng(e.latlng);
+        userMarker.setLatLng(latlng);
       }
-    });
+    }
 
-    map.on('locationerror', err => {
-      console.warn("[GPS] Searching location / satellite fix...", err.message);
-      setTimeout(startGpsTracking, 3000);
-    });
+    if ("geolocation" in navigator) {
+      // 1. Instant coarse fix
+      navigator.geolocation.getCurrentPosition(
+        pos => updatePosition(pos.coords.latitude, pos.coords.longitude),
+        err => console.warn("[GPS Coarse]", err.message),
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
+      );
+
+      // 2. Continuous real-time high-accuracy tracking
+      navigator.geolocation.watchPosition(
+        pos => updatePosition(pos.coords.latitude, pos.coords.longitude),
+        err => console.warn("[GPS Watch]", err.message),
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 2000 }
+      );
+    }
   </script>
 
   <script>
