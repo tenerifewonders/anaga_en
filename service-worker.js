@@ -1,4 +1,4 @@
-const CACHE_NAME = "anaga-en-v4";
+const CACHE_NAME = "anaga-en-v5";
 
 const ASSETS = [
 "./",
@@ -338,21 +338,17 @@ self.addEventListener("install", (e) => {
         }
       }
 
-      // Pre-fetch all map tiles individually (so 1 missing tile never breaks the rest)
+      // Pre-fetch all map tiles using clean URL resolution (NO double slash bugs)
       if (TILES.length > 0) {
         console.log("[SW] Pre-caching map tiles (" + TILES.length + " tiles)...");
         for (const tileUrl of TILES) {
           try {
-            const req = new Request(tileUrl, { method: "GET" });
+            const absUrl = new URL(tileUrl, self.location.href).href;
+            const req = new Request(absUrl, { method: "GET" });
             const res = await fetch(req);
             if (res && res.status === 200) {
+              await cache.put(absUrl, res.clone());
               await cache.put(tileUrl, res);
-              // Also store under relative path
-              if (tileUrl.startsWith("./")) {
-                const cleanRel = tileUrl.substring(1);
-                const fullAbs = self.location.origin + self.location.pathname.replace(/[^/]*$/, "") + cleanRel.substring(1);
-                await cache.put(fullAbs, res.clone());
-              }
             }
           } catch (err) {
             // Ignore single tile fetch warnings
@@ -412,7 +408,7 @@ self.addEventListener("fetch", (e) => {
   );
 });
 
-// Helper: Handle Map Tiles offline fetching & URL matching
+// Helper: Handle Map Tiles offline fetching & URL matching (Zero Double-Slash Bugs)
 async function handleTileFetch(request) {
   const cache = await caches.open(CACHE_NAME);
   
@@ -420,23 +416,28 @@ async function handleTileFetch(request) {
   let cached = await cache.match(request);
   if (cached) return cached;
 
-  // 2. Check by relative tile path (./tiles/z/x/y.png)
+  // 2. Check by resolved absolute URL
+  const absUrl = new URL(request.url, self.location.href).href;
+  cached = await cache.match(absUrl);
+  if (cached) return cached;
+
+  // 3. Check by relative tile path (./tiles/z/x/y.png)
   const tilePart = request.url.substring(request.url.indexOf("/tiles/"));
   const relTilePath = "." + tilePart;
   cached = await cache.match(relTilePath);
   if (cached) return cached;
 
-  // 3. If online, fetch and cache
+  // 4. If online, fetch and cache
   try {
     const netRes = await fetch(request);
     if (netRes && netRes.status === 200) {
       await cache.put(request, netRes.clone());
       await cache.put(relTilePath, netRes.clone());
+      await cache.put(absUrl, netRes.clone());
     }
     return netRes;
   } catch (err) {
     console.warn("[SW] Tile offline & not cached:", request.url);
-    // Return empty transparent 256x256 PNG if tile missing offline
     return new Response("", { status: 404 });
   }
 }

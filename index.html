@@ -235,13 +235,37 @@
 
     let userMarker = null;
 
+    // Fast initial position lookup (Instant 1-second dot)
+    map.locate({ setView: false, enableHighAccuracy: false });
+
     function startGpsTracking() {
       map.locate({
         watch: true,
         enableHighAccuracy: true,
         maximumAge: 2000,
-        timeout: 15000
+        timeout: 10000
       });
+    }
+
+    startGpsTracking();
+
+    map.on('locationfound', e => {
+      if (!userMarker) {
+        userMarker = L.circleMarker(e.latlng, {
+          radius: 8,
+          color: "#007bff",
+          fillColor: "#3fa0ff",
+          fillOpacity: 0.8
+        }).addTo(map);
+      } else {
+        userMarker.setLatLng(e.latlng);
+      }
+    });
+
+    map.on('locationerror', err => {
+      console.warn("[GPS] Searching location / satellite fix...", err.message);
+      setTimeout(startGpsTracking, 3000);
+    });
     }
 
     startGpsTracking();
