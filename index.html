@@ -278,8 +278,6 @@
                         || window.navigator.standalone === true 
                         || document.referrer.includes('android-app://');
 
-      // 📱 El pequeño salto de recarga SOLO ocurre dentro de la APP INSTALADA (Modo Standalone)
-      // 🌐 En el navegador web normal NUNCA salta ni recarga
       if (isStandalone) {
         let refreshing = false;
         navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -299,19 +297,23 @@
       document.getElementById('android-msg').style.display = 'block';
     }
   </script>
-  <script>
+  
+
+<script>
     function initOfflineBanner() {
-      // 📱 REGLA ESTRICTA: El banner SOLO aparece dentro de la APP INSTALADA (Modo Standalone)
+      const params = new URLSearchParams(window.location.search);
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
                         || window.navigator.standalone === true 
-                        || document.referrer.includes('android-app://');
+                        || document.referrer.includes('android-app://')
+                        || params.get('banner') === 'true';
 
       if (!isStandalone) {
-        // 🚫 En el navegador web NUNCA aparece
         return;
       }
 
-      if (localStorage.getItem('tw_offline_ready_anaga_en')) return;
+      if (localStorage.getItem('tw_offline_ready_anaga_en') === 'true' && params.get('banner') !== 'true') {
+        return;
+      }
 
       const banner = document.getElementById('offline-banner');
       const title = document.getElementById('offline-banner-title');
@@ -325,9 +327,8 @@
         banner.style.borderLeftColor = '#28a745';
         title.style.color = '#28a745';
         title.innerHTML = '✅ App ready for 100% offline use!';
-        msg.innerHTML = 'All 288 map tiles & audio tracks are saved on your phone. You can now enable Airplane Mode.';
+        msg.innerHTML = 'All map tiles & audio tracks are saved on your phone. You can now enable Airplane Mode.';
         btn.style.display = 'inline-block';
-        localStorage.setItem('tw_offline_ready_anaga_en', 'true');
       }
 
       if (navigator.serviceWorker) {
@@ -337,21 +338,20 @@
           }
         });
       }
-      setTimeout(markReady, 5000);
+      setTimeout(markReady, 4000);
     }
 
     function closeOfflineBanner() {
       const banner = document.getElementById('offline-banner');
       if (banner) banner.style.display = 'none';
+      localStorage.setItem('tw_offline_ready_anaga_en', 'true');
     }
 
-    // ⚡ Se ejecuta al cargar el DOM pero SOLO muestra el banner si es la APP INSTALADA
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initOfflineBanner);
     } else {
       initOfflineBanner();
     }
   </script>
-
 </body>
 </html>
